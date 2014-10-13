@@ -1,0 +1,70 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP., 1992                                                */
+/*                                                                          */
+/****************************************************************************/
+DLGTEMPLATE CGENDLG LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG "Code Generation Options", CGENDLG, -378, -42, 301, 211, FS_NOBYTEALIGN |
+                FS_DLGBORDER | FS_SIZEBORDER | WS_CLIPSIBLINGS |
+                WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
+    BEGIN
+
+        CONTROL "OK", 1, 8, 10, 35, 13, WC_BUTTON, BS_PUSHBUTTON | BS_DEFAULT | WS_TABSTOP |
+                WS_VISIBLE
+        CONTROL "CANCEL", 2, 153, 10, 42, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "HELP", 280, 201, 10, 35, 13, WC_BUTTON, BS_PUSHBUTTON |
+                BS_HELP | WS_TABSTOP | WS_VISIBLE
+        CONTROL "RESET", OPTION_RESET, 52, 10, 37, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "DEFAULT", OPTION_DEFAULT, 98, 10, 49, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+
+        CONTROL "Memory Model", 999, 17, 100, 118, 98, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "Small Model", GENMODELST, 25, 173, 85, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Medium Model", 402, 25, 159, 85, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Compact Model", 403, 25, 145, 85, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Large Model", 404, 25, 131, 85, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Huge Model", 405, 25, 117, 85, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Custom Model", GENMODELCUST, 25, 103, 85, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+
+        CONTROL "Floating Point Generation", 407, 153,105, 133, 93, WC_STATIC,
+                SS_GROUPBOX | WS_GROUP | WS_VISIBLE
+        CONTROL "Calls with AltMath", GENFLOATST, 165, 173, 96, 10, WC_BUTTON,
+                BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Calls with Emulator", 409, 165, 159, 104, 10, WC_BUTTON,
+                BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Calls with 80x87 Lib", 410, 165, 145, 111, 10, WC_BUTTON,
+                BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Inline with Emulator", 411, 165, 131, 104, 10, WC_BUTTON,
+                BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Inline with 80x87 Lib", 412, 165,117, 102, 10, WC_BUTTON,
+                BS_AUTORADIOBUTTON | WS_TABSTOP | WS_VISIBLE
+
+        CONTROL "Miscellaneous", 413, 17, 33, 269, 60, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "Pascal style function calls", GENPASCAL, 25, 73, 130, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Generate PM entry ", GENPM, 165, 73, 120, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "No stack checking", GENSTACK, 25, 58, 120, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Strings in const segm", GENCONST, 165, 58, 120, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Set data size threshold", GENTHRESH, 25, 43,130, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "", GENTHRESH_ENTRY, 165, 43, 85, 10, WC_ENTRYFIELD, ES_LEFT | ES_MARGIN | ES_AUTOSCROLL |
+                WS_TABSTOP | WS_VISIBLE
+
+    END
+END
+
+

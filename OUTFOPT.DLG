@@ -1,0 +1,50 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP., 1992                                                */
+/*                                                                          */
+/****************************************************************************/
+DLGTEMPLATE OUTFDLG LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG "Output Files", OUTFDLG, 8, -12, 278, 183, FS_NOBYTEALIGN | FS_DLGBORDER |
+                FS_SIZEBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS,
+                FCF_TITLEBAR
+    BEGIN
+        CONTROL "Source Listing", OUTSRCOPT, 5, 162, 78, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Map File", OUTMAPOPT, 5, 146, 74, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Object Listing Type", OUTOBJGRP, 6, 85, 96, 54, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "Object Listing", OUTOBJOBJ, 11, 114, 86, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Assembly Listing", OUTOBJASM, 11, 102, 86, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Combined Listing", OUTOBJCOM, 11, 90, 86, 10, WC_BUTTON, BS_AUTOCHECKBOX |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "", OUTSRCNAME, 114, 164, 158, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "", OUTMAPNAME, 114, 148, 158, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "", OUTOBJFNAME, 114, 122, 158, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "", OUTOBJNAME, 114, 63, 158, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Object Name :", 65535, 7, 63, 85, 8, WC_STATIC, SS_TEXT |
+                DT_LEFT | DT_TOP | WS_GROUP | WS_VISIBLE
+        CONTROL "", OUTEXENAME, 114, 38, 158, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Executable Name :", 65535, 7, 38, 85, 8, WC_STATIC, SS_TEXT |
+                DT_LEFT | DT_TOP | WS_GROUP | WS_VISIBLE
+        CONTROL "OK", 1, 8, 10, 35, 13, WC_BUTTON, BS_PUSHBUTTON | BS_DEFAULT | WS_TABSTOP |
+                WS_VISIBLE
+        CONTROL "RESET", OPTION_RESET, 52, 10, 37, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "CANCEL", 2, 153, 10, 42, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "HELP", 280, 201, 10, 35, 13, WC_BUTTON, BS_PUSHBUTTON |
+                BS_HELP | WS_TABSTOP | WS_VISIBLE
+        CONTROL "DEFAULT", OPTION_DEFAULT, 98, 10, 49, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+    END
+END
+

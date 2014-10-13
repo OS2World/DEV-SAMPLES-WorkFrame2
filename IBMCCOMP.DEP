@@ -1,0 +1,22 @@
+# IBMCMAKE run at 16:05:59 on 11/27/90
+
+
+IBMCCOMP.OBJ:  IBMCCOMP.C       \
+#  {$(INCLUDE)}<os2.h>          \
+#  {$(INCLUDE)}<stdio.h>        \
+#  {$(INCLUDE)}<stdlib.h>       \
+#  {$(INCLUDE)}<string.h>       \
+   {.;$(INCLUDE)}IBMCCOMP.H      
+
+IBMCCOMP.RES:  IBMCCOMP.RC      \
+#  {$(INCLUDE)}<os2.h>          \
+   {.;$(INCLUDE)}IBMCCOMP.H       \
+   IBMCCOMP.DLG     \
+   IBMCOPT.DLG      \
+   IBMCCGEN.DLG     \
+   IBMCSCUS.DLG     \
+   IBMCCTL.DLG      \
+   PREPOPTS.DLG     \
+   OUTFOPT.DLG      \
+   LISTOPT.DLG      \
+   SCTLOPT.DLG     

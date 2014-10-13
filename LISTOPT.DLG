@@ -1,0 +1,50 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP., 1992                                                */
+/*                                                                          */
+/****************************************************************************/
+DLGTEMPLATE LISTDLG LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG "Listing Options", LISTDLG, 9, -18, 274, 127, FS_NOBYTEALIGN | FS_DLGBORDER |
+                FS_SIZEBORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_SAVEBITS,
+                FCF_TITLEBAR
+    BEGIN
+        CONTROL "OK", 1, 8, 10, 35, 13, WC_BUTTON, BS_PUSHBUTTON | BS_DEFAULT | WS_TABSTOP |
+                WS_VISIBLE
+        CONTROL "RESET", OPTION_RESET, 52, 10, 37, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "CANCEL", 2, 153, 10, 42, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "HELP", 280, 201, 10, 35, 13, WC_BUTTON, BS_PUSHBUTTON |
+                BS_HELP | WS_TABSTOP | WS_VISIBLE
+        CONTROL "DEFAULT", OPTION_DEFAULT, 98, 10, 49, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Warning Level", LSTWARNGRP, 5,  66, 75, 58, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "0", LSTWARN0, 29, 105, 32, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "1", LSTWARN1,  29,  93, 32, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "2", LSTWARN2, 29,  81, 32, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "3", LSTWARN3, 29,  70, 32, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "", LSTLINE, 126, 98 , 30, 8, WC_ENTRYFIELD, ES_LEFT | ES_MARGIN |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Set Line Width", 65535, 116, 110, 70, 8, WC_STATIC, SS_TEXT |
+                DT_LEFT | DT_TOP | WS_GROUP | WS_VISIBLE
+        CONTROL "", LSTPAGE, 207,  98, 29, 8, WC_ENTRYFIELD, ES_LEFT | ES_MARGIN |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Set Page Length", 65535, 193, 110, 72, 8, WC_STATIC, SS_TEXT |
+                DT_LEFT | DT_TOP | WS_GROUP | WS_VISIBLE
+        CONTROL "", LSTTITLE, 119,  67, 148, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Set Title String", 65535, 118, 80 , 124, 8, WC_STATIC,
+                SS_TEXT | DT_LEFT | DT_TOP | WS_GROUP | WS_VISIBLE
+        CONTROL "", LSTSUBTITLE, 119, 36, 147, 8, WC_ENTRYFIELD, ES_LEFT | ES_AUTOSCROLL |
+                ES_MARGIN | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Set Subtitle String", 65535, 118,  49, 103, 8, WC_STATIC,
+                SS_TEXT | DT_LEFT | DT_TOP | WS_GROUP | WS_VISIBLE
+    END
+END
+

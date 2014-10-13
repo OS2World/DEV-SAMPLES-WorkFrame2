@@ -1,0 +1,67 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP. 1992                                                 */
+/*                                                                          */
+/* ------------------------------------------------------------------------ */
+/*                                                                          */
+/* This file provdies a sample RC file which can be used to create the INI  */
+/* file for inputting into the ADDTOOL utility.                             */
+/*                                                                          */
+/*                                                                          */
+/****************************************************************************/
+
+CODEPAGE 850
+
+STRINGTABLE
+BEGIN
+
+/* **** Tool Count **** */
+
+  "TOOLS"      "COUNT"      "2"    /* defining 2 tools */
+
+
+
+/* **** Tool 1 of 2 **** */
+
+  "TOOLS1"     "TITLE"      "Sample Tool 1"             /* menu string     */
+
+  "TOOLS1"     "PRG"        "sample1.exe"               /* program name    */
+
+  "TOOLS1"     "DIR"        "."                         /* start directory */
+
+  "TOOLS1"     "PROMPT"     "Sample 1 Optional prompt"  /* optional prompt */
+
+  "TOOLS1"     "INVOKE"     "Sample 1 parameter"        /* invocation parm */
+
+  "TOOLS1"     "PROMTYPE"   "1"                         /* 0 = don't prompt*/
+                                                        /* 1 = prompt      */
+
+  "TOOLS1"     "SESSION"    "1"                         /* 0 = foreground  */
+                                                        /* 1 = background  */
+
+  "TOOLS1"     "PRGMTYPE"   "1"                         /* 0 = program determines */
+                                                        /* 1 = OS/2 full screen   */
+                                                        /* 2 = OS/2 Text window   */
+                                                        /* 3 = Presentation Mngr  */
+                                                        /* 4 = DOS full screen    */
+                                                        /* 7 = DOS Text window    */
+
+  "TOOLS1"     "NEW"        "0"
+
+
+
+
+/* **** Tool 2 of 2 **** */
+
+  "TOOLS2"     "TITLE"      "Sample Tool 2"
+  "TOOLS2"     "PRG"        "sample2.exe"
+  "TOOLS2"     "DIR"        "c:\os2"
+  "TOOLS2"     "PROMPT"     ""
+  "TOOLS2"     "INVOKE"     ""
+  "TOOLS2"     "PROMTYPE"   "0"
+  "TOOLS2"     "SESSION"    "0"
+  "TOOLS2"     "PRGMTYPE"   "7"
+  "TOOLS2"     "NEW"        "0"
+
+END
+

@@ -1,0 +1,2783 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                    WORKFRAME/2
+                                                         PROGRAMMING INTERFACES
+ 
+                                                                        DRAFT 4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                    May 2, 1992
+ 
+ 
+ 
+ 
+                                                                            LTC
+                                                             Toronto Laboratory
+                                                       VNET  - KEHM at TOROLAB6
+                                                 email - workframe@vnet.ibm.com
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  CONTENTS
+  ________
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   Contents  ii
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  FIGURES
+  _______
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   Figures  iii
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  +--- CHANGES TO THIS DOCUMENT SINCE DRAFT 2 --------------------------------+
+  |                                                                           |
+  | o   The FINDINCLUDE interface in support of Make File creation has        |
+  |     changed the meaning of the first element of each array passed in the  |
+  |     first two parameters.                                                 |
+  |                                                                           |
+  | o   The PARSEERROR interface in the compiler DLL has changed to allow two |
+  |     additional parameters. One parameters is a pointer to the compiler    |
+  |     options area used in that invocation and the second parameter is a    |
+  |     flag field indicating the state of that field.                        |
+  |                                                                           |
+  | o   The guidelines for Dialog development have been changed to reflect    |
+  |     the recommendations of the Usability task force.                      |
+  |                                                                           |
+  | o   The section describing the Language Profile has changed to reflect    |
+  |     the current interface and its requirements.                           |
+  |                                                                           |
+  | o   The first driver of the WorkFrame that supports all the interfaces    |
+  |     will be Driver 17.                                                    |
+  |                                                                           |
+  | o   Source for the default DLL that provides support for each of these    |
+  |     interfaces and for a sample monitor that illustrates the IDE message  |
+  |     handling required of an enabled editor are available through the      |
+  |     author of this document.                                              |
+  |                                                                           |
+  +---------------------------------------------------------------------------+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                              1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  +--- CHANGES TO THIS DOCUMENT SINCE DRAFT 3 --------------------------------+
+  |                                                                           |
+  | o   Compiler DLL may support two additional interfaces in support of help |
+  |     for error messages. One interface provides the name of the help file, |
+  |     the second interface provides the resource id of the entry in the     |
+  |     help file corresponding to a particular error message line. If these  |
+  |     interfaces are not present in the DLL, the WorkFrame will assume that |
+  |     help for messages is not provided.                                    |
+  |                                                                           |
+  | o   The DDE messages sent to the editor have been changed to provide the  |
+  |     additional informationprovided in support of error message help.      |
+  |                                                                           |
+  |     The Initialize message contains an additional field at the end con-   |
+  |     taining the library name. This field may be the null string if no     |
+  |     library is provided.                                                  |
+  |                                                                           |
+  |     The goto message contains an additional field that is the resource id |
+  |     for the message. If the resource id is zero, it is not provided.      |
+  |                                                                           |
+  |     It is assumed that the editor will reserve first 20000 resource ids   |
+  |     and that the compiler help file will use resource ids of 20001 or     |
+  |     greater.                                                              |
+  |                                                                           |
+  | o   The first driver of the WorkFrame that supports all the interfaces    |
+  |     will be Driver 33.                                                    |
+  |                                                                           |
+  | o   All changes since Draft 3 will be denoted by a bar, |.                |
+  |                                                                           |
+  +---------------------------------------------------------------------------+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                              2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  WORKFRAME PROGRAMMING INTERFACES FOR COMPILER WRITERS
+  _____________________________________________________
+ 
+ 
+ 
+ 
+ 
+  The WorkFrame supports four application programming interfaces in support of
+  "Options/Actions" processing, one interface in support of the Editor, and two
+  interfaces in support of the Make file creation process.  Specifically,
+ 
+  1.  Interface to acquire Compiler Options and Invocation String,
+ 
+  2.  Interface to acquire Link Options and Invocation String,
+ 
+  3.  Interface to acquire Debug Options and Invocation String,
+ 
+  4.  Interface to acquire Make Options and Invocation String,
+ 
+| 5.  Interfaces to support compiler error messages,
+ 
+|     o   Interface to parse error messages,
+ 
+|     o   Interface to return the name of the help file,
+ 
+|     o   Interface to return the help resource id corresponding to a given
+|         message line.
+ 
+  6.  Interfaces in support of Make file creation
+ 
+      o   Interface to build source file include dependencies,
+ 
+      o   Interface to free acquired memory
+ 
+  The compiler writer may provide one DLL that contains all these interfaces or
+  may provide a separate DLL for each of the four Options acquisition inter-
+| faces.  The three compiler error message interfaces and the two make file
+  creation supporting interfaces MUST be contained in the same DLL as the Com-
+  piler Options interface.  The name of the DLL containing each entry point is
+  described in the Language Profile (see -- Heading 'LP' unknown --).
+ 
+  The 4 Options interfaces are called in response to the following actions:
+ 
+  o   The user has selected the corresponding menu item from the "Options"
+      pulldown and wishes to create/change the set of options associated with
+      the current project. This interface can also be called during project
+      create/change processing.
+ 
+  o   The user has selected the corresponding menu item from the "Actions"
+      pulldown. The WorkFrame will invoke the DLL interface to build an invoca-
+      tion string, passing it the options structure previously saved with the
+      project.
+ 
+  o   The user is creating or changing a project and selects the option to
+      create/change a specific set of options.
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  The Compiler Options and Link Options interfaces can also be invoked in
+  support of the Make file creation process.
+ 
+  The default DLL shipped with the WorkFrame provides default entry points for
+  all these interfaces. The WorkFrame also supplies a DLL that will support the
+  OS/2 supplied Linker. For most compiler writers, this DLL and the default DLL
+  entry points for Make and Debug are sufficient. However, a unique DLL should
+  be provided containing the Compile Options, Editor Support and Make File Cre-
+  ation support interfaces.
+ 
+  Each of these interfaces is described in detail in the subsequent sections of
+  this document.
+ 
+ 
+ 
+  INTERFACE TO ACQUIRE COMPILER OPTIONS AND INVOCATION STRING
+  ___________________________________________________________
+ 
+  The entry point "GETCOMPILEOPTS" is invoked under two different circumstances
+  in response to a user action bar request. When the user selects
+  "Options/Compile" from the action bar, or "Compiler Options" from project
+  creation/change, or "Compiler Options" from Make File creation dialog, the
+  entry point is invoked to acquire a set of compile options to associate with
+  the current project. When the user selects "Actions/Compile" or
+  "Actions/Build" from the action bar, the interface is invoked to build a
+  string that will be passed to the compiler when it is invoked.
+ 
+  The interface must be provided in a DLL. The interface can be either 32-bit
+  or 16-bit (with the caveat that all interfaces in the DLL must be of the same
+  type, either all 32-bit or all 16-bit).  The DLL name is provided in the lan-
+  guage profile supplied by the language developer.  If the interface is 16-bit
+  it must be coded to use the FAR PASCAL linkage convention. If it is 32-bit it
+  must abide by the OS/2 V2.0 System linkage conventions.  Pictorially,
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  -----------------------------------------------------------------------------
+ 
+  +-------------------+
+  |   |Options|       |
+  |---+-------+-------|
+  |   |Compile|       |
+  |   |       |       |
+  |   +-------+       |
+  |                   |
+  |                   |      +--------+
+  |                   |      |Language|
+  +-------------------+      |Profile |
+      |                      +--------+
+      |  (1)                     |
+      |                          |
+      V                  (2)     V                +----------------+
+  +---------+               +----------+   (3)    |Compiler Options|
+  | Project |------------>  | Compile  |--------> |     DLL        |
+  |   File  |               | Options  |          |                |
+  +---------+<--------------| Save Area|<---------|                |
+                (4)         +----------+          +----------------+
+ 
+ 
+ 
+  -----------------------------------------------------------------------------
+  Figure 1. Compile Options Acquisition.
+ 
+            1.  Once "Options/Compile" is selected, the WorkFrame will read the
+                compile options associated with the current project.
+ 
+            2.  The Language profile is read to acquire the name of the DLL
+                associated with the current language (the WorkFrame ensures
+                that the compile options associated with the project are valid
+                for the current language) and the amount of memory required to
+                hold the compile options and invocation string.
+ 
+            3.  The options are then passed to the entry point in the DLL.  The
+                DLL is expected to display a dialog to obtain compiler options.
+                If a set of options already existed, the dialog should be ini-
+                tialized with existing settings. The DLL must return an updated
+                compile options area and a compiler invocations string (the
+                latter is not pictured in this diagram).
+ 
+            4.  The DLL indicates to the shell whether the changed options
+                should be saved with the project. If so, the project control
+                file is updated.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  5
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  -----------------------------------------------------------------------------
+ 
+  +-------------------+
+  |   |Actions|       |
+  |---+-------+-------|
+  |   |Compile|       |
+  |   |       |       |
+  |   +-------+       |
+  |                   |
+  |                   |      +--------+
+  |                   |      |Language|
+  +-------------------+      |Profile |
+      |                      +--------+
+      |  (1)                     |
+      |                          |
+      V                  (2)     V                +----------------+
+  +---------+               +----------+   (3)    |Compiler Options|
+  | Project |------------>  | Compile  |--------> |     DLL        |
+  |   File  |               | Options  |          |                |
+  +---------+               | Save Area|          |                |
+                            +----------+          +----------------+
+                                                         |
+   +----------+              +----------+                |
+   |          |    (5)       | Compile  |     (4)        |
+   | Compiler |<-------------| Invoct'n |<---------------+
+   |          |              | String   |
+   +----------+              +----------+
+ 
+ 
+  -----------------------------------------------------------------------------
+  Figure 2. Compiler Invocation.
+ 
+            1.  Once "Actions/Compile" is selected, the WorkFrame will read the
+                compile options associated with the current project.
+ 
+            2.  The Language profile is read to find out the name of the DLL
+                associated with the current language (the WorkFrame ensures
+                that the compile options associated with the project are valid
+                for the current language) and the amount of memory required to
+                hold the compile options and the invocation string.
+ 
+            3.  Any existing options are passed to the DLL.
+ 
+            4.  The DLL is invoked to build an output string (and not display
+                the dialog).
+ 
+            5.  If the string is built successfully the WorkFrame will use it
+                to invoke the compiler, the compiler name was extracted from
+                language profile.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  6
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  INVOCATION SYNTAX
+ 
+             LONG GETCOMPILEOPTS(HWND    hWorkFrame,
+                                 PVOID   pvCompilerOptions,
+                                 ULONG * pulCompOptionsLgth,
+                                 PSZ     pszReserved,
+                                 PSZ     pszInvocationString,
+                                 ULONG   ulInvocationAreaSize
+                                 HMODULE hModHandle,
+                                 PSZ     pszProject,
+                                 PSZ     pszFilename,
+                                 ULONG * pulAction)
+ 
+  GETCOMPILEOPTS is invoked with FAR PASCAL linkage if the entry point is spec-
+  ified as 16-bit. All pointers must be FAR pointers.  If the interface is
+  specified as 32-bit then it will be invoked with OS/2 V2.0 System linkage.
+  All pointers are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+  HWORKFRAME          Handle of the WorkFrame primary window.
+ 
+  PVCOMPILEROPTIONS   Pointer to an area containing the existing compiler
+                      options.  This area is of size pulCompOptionsLgth. This
+                      area contains existing options if the USEDEFAULTS bit in
+                      pulAction is NOT set.  This area should be updated with
+                      the new compiler options after interaction with the user.
+ 
+  PULCOMPOPTIONSLGTH  This parameter is input/output. On input, it specifies
+                      the size of the area provided for storing the options.
+                      This size is specified in the Language Profile.  On
+                      output, the interface is expected to specify the actual
+                      size of the options structure.  This size is used when
+                      writing the options to the project file.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box indicating what size is required.
+                      The user can take corrective action by increasing the
+                      area size in the Language Profile.
+ 
+  PSZRESERVED         This parameter is provided for compatibility reasons. The
+                      interface should ignore it.
+ 
+  PSZINVOCATIONSTRING This is the area provided to hold the compiler invocation
+                      string.  Its size is ulInvocationAreaSize. This string
+                      must be ASCIIZ, ie nul-delimited.
+ 
+  ULINVOCATIONAREASIZE This is an input parameter only. It provides the size of
+                      the data area provided to hold the invocation string.
+                      This size is specified in the Language Profile.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box indicating what size is required.
+ 
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  7
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      The user can take corrective action by increasing the
+                      area size in the Language profile.
+ 
+  HMODHANDLE          This is the handle of the Compiler Options DLL. This
+                      parameter should be used to access any resources bound to
+                      the DLL (ie string tables, dialogs).
+ 
+  PSZPROJECT          This is the character description (max. 100) of the
+                      project for which the compiler options are required. The
+                      interface may display this description on its dialogs.
+ 
+  PSZFILENAME         This parameter will be passed only in response to
+                      "Actions/Build" or "Actions/Compile". The interface is
+                      expected to insert the filename in the appropriate place
+                      in the compiler invocation string being built.
+ 
+                      If this parameter is NULL. The invocation string should
+                      be built without a filename.
+ 
+  PULACTION           Input/Output area for communicating desired actions with
+                      the WorkFrame. The options and the bit settings are as
+                      follows:
+ 
+                      o   STOREOPTS   0x0001
+ 
+                          This bit is set by the Compiler DLL if the user has
+                          requested that the options be saved with the project.
+                          The WorkFrame will test this bit when control is
+                          returned during "Options/Compile" processing.
+ 
+                      o   NODLGS      0x0002
+ 
+                          This bit is set if the WorkFrame wishes the interface
+                          to not display a dialog, but to simply return an
+                          invocation string. This bit is set during
+                          "Actions/Compile" and "Actions/Build" processing.
+ 
+                      o   USEDEFAULTS 0x0004
+ 
+                          This bit is set if the compile options have not pre-
+                          viously existed for this Project. The area being
+                          passed to the interface will be uninitialized. The
+                          interface should set up all options based on compiler
+                          defaults and return them in the compiler options and
+                          invocation string areas. If this bit is off then the
+                          compiler options are provided in the area. If bit 2
+                          is off (ie not NODLGS) then these options should be
+                          used to initialize the dialogs. If bit 2 is on then
+                          the options should be analyzed to produce an invoca-
+                          tion string.
+ 
+  The returns codes are as follows:
+ 
+      0 - SUCCESS
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  8
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      1 - CANCEL was pressed
+ 
+      2 - ERROR occurred (the DLL will have displayed an appropriate error
+      message).
+ 
+ 
+  GUIDELINES
+ 
+  1.  The dialogs should all be CUA-conformant.
+ 
+  2.  The interface should attempt to minimize the size of the compiler options
+      area, since this area will be written to a project file. (eg one bit for
+      each binary option).
+ 
+  3.  The dialogs should be constructed such that a primary dialog (see -- Fig
+      'FIG3' unknown --) is created displaying pushbuttons for various catego-
+      ries of compiler options and include a check box to specify whether the
+      options should be saved with the project or not. Each compiler category
+      would have its own dialog which should be created modeless to allow for
+      more than one category to be displayed and manipulated concurrently.
+ 
+  4.  The dialogs should contain an OK, DEFAULT, CANCEL, and HELP buttons,
+      where the DEFAULT button on the main panel sets the fields for all
+      options to their default and DEFAULT on the secondary dialogs sets only
+      the options related to the specific category.
+ 
+      The Dialogs my optionally contain a RESET button. This button, would
+      reset all options to what they were before the Dialog was invoked. Its
+      behavior is the same as pressing CANCEL and re-entering the dialog.
+ 
+  5.  Dismissing the main dialog should dismiss all secondary dialogs.
+ 
+  6.  The interface should provide the user with the option of saving the
+      options with the project (see the checkbox in -- Fig 'FIG3' unknown --).
+      The state of this choice may be saved between invocations and used to
+      initialize the dialog.  If this option is not saved then the dialog
+      should initialize the checkbox such that the options are saved by
+      default.
+ 
+  7.  Conflict resolution between the secondary dialogs should be conducted
+      when the user presses the Ok button on the primary option dialog.
+ 
+  8.  If the Ok button is pressed on the primary dialog but the user has not
+      closed the secondary dialogs, an information message should be displayed
+      and the user should be forced to terminate each secondary dialog first.
+ 
+  -----------------------------------------------------------------------------
+ 
+ 
+  -----------------------------------------------------------------------------
+  Figure 3. Compiler Options Main Dialog
+ 
+ 
+ 
+ 
+ 
+                       WorkFrame Programming Interfaces for Compiler Writers  9
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  INTERFACE TO ACQUIRE LINK OPTIONS AND INVOCATION STRING
+  _______________________________________________________
+ 
+  The entrypoint "GETLINKOPTS" is invoked under two different circumstances in
+  response to a user action bar request. When the user selects "Options"/"Link"
+  from the action bar, or "Linker Options" from project creation/change, or
+  "Link Options" from Make File creation dialog, the entry point is invoked to
+  acquire a set of link options to associate with the current project. When the
+  user selects "Actions/Link" or "Actions/Build" from the action bar, the
+  interface is invoked to build a string that will be passed to the linker when
+  it is invoked.
+ 
+  The interface must be provided in a DLL. The interface can be either 32-bit
+  or 16-bit (with the caveat that all interfaces in the DLL must be of the same
+  type, either all 32-bit or all 16-bit).  The DLL name is provided in the Lan-
+  guage Profile supplied by the language developer.  If the interface is 16-bit
+  it must be coded to use the FAR PASCAL linkage convention. If it is 32-bit it
+  must abide by the OS/2 V2.0 System linkage conventions.
+ 
+ 
+  INVOCATION SYNTAX
+ 
+             LONG  GETLINKOPTS(HWND    hWorkFrame,
+                               PVOID   pvLinkerOptions,
+                               ULONG * pulLinkOptionsLgth,
+                               PSZ     pszExename,
+                               PSZ     pszInvocationString,
+                               ULONG   ulInvocationAreaSize
+                               HMODULE hModHandle,
+                               PSZ     pszProject,
+                               PSZ   * pszObjects,
+                               ULONG * pulAction,
+                               ULONG * pulLibraryOffset)
+ 
+ 
+  GETLINKOPTS is invoked with FAR PASCAL linkage if the entry point is speci-
+  fied as 16-bit. All pointers must be FAR pointers.  If the interface is spec-
+  ified as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All
+  pointers are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+  HWORKFRAME          Handle of the WorkFrame primary window.
+ 
+  PVLINKEROPTIONS     Pointer to an area containing the existing linker
+                      options.  This area is of size pulLinkOptionsLgth. This
+                      area contains existing options if the USEDEFAULTS bit in
+                      pulAction is NOT set.  This area should be updated with
+                      the new linker options after interaction with the user.
+ 
+  PULLINKOPTIONSLGTH  This parameter is an input/output field. On input it
+                      specifies the size of the area provided for storing the
+                      options.  This size is specified in the Language Profile.
+                      On output, the interface is expected to specify the
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  10
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      actual size of the options structure.  This size is used
+                      when writing the options to the project file.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box indicating what size is required.
+                      The user can take corrective action by increasing the
+                      area size in the Language Profile.
+ 
+  PSZEXENAME          This parameter is the target name defined when the
+                      project was created. It can be used to initialize the
+                      EXENAME or DLLNAME on a dialog.
+ 
+  PSZINVOCATIONSTRING This is the area provided to hold the linker invocation
+                      string.  Its size is ulInvocationAreaSize. This string
+                      must be ASCIIZ, ie nul-delimited.
+ 
+  ULINVOCATIONAREASIZE This is an input parameter only. It provides the size of
+                      the data area provided to hold the invocation string.
+                      This size is specified in the Language Profile.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box indicating what size is required.
+                      The user can take corrective action by increasing the
+                      area size in the Language profile.
+ 
+  HMODHANDLE          This is the handle of the Linker Options DLL. This param-
+                      eter should be used to access any resources bound to the
+                      DLL (ie string tables, dialogs).
+ 
+  PSZPROJECT          This is the up to 100 character description of the
+                      project for which the linker options are required. The
+                      interface may display this description on its dialogs.
+ 
+  PSZOBJECTS          This parameter will be passed only in response to
+                      "Actions/Build" or "Actions/Link". This parameter con-
+                      tains an array of pointers to objects to be linked
+                      together. The listed is terminated by a NULL pointer.
+                      The interface is expected to insert the objects in the
+                      appropriate place in the linker invocation string being
+                      built.
+ 
+                      If this parameter is NULL. The invocation string should
+                      be built as a string of options only. This string will be
+                      used during the the makefile creation processing, where
+                      the utility is only interested in a generic linker
+                      options.
+ 
+  PULACTION           Input/Output area for communicating desired actions with
+                      the WorkFrame. The options and the bit settings are as
+                      follows:
+ 
+                      o   STOREOPTS   0x0001
+ 
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  11
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                          This bit is set by the Linker DLL if the user has
+                          requested that the options be saved with the project.
+                          The WorkFrame will test this bit when control is
+                          returned during "Options/Link" processing.
+ 
+                      o   NODLGS      0x0002
+ 
+                          This bit is set if the WorkFrame wishes the interface
+                          to not display a dialog, but to simply return an
+                          invocation string. This bit is set during
+                          "Actions/Link" and "Actions/Build" processing.
+ 
+                      o   USEDEFAULTS 0x0004
+ 
+                          This bit is set if the link options have not previ-
+                          ously existed for this Project. The area being passed
+                          to the interface will be uninitialized. The interface
+                          should set up all options based on linker defaults
+                          and return them in the linker options and invocation
+                          string areas. If this bit is off then the linker
+                          options are provided in the area. If bit 2 is off (ie
+                          not NODLGS) then these options should be used to ini-
+                          tialize the dialogs. If bit 2 is on then the options
+                          should be analyzed to produce an invocation string.
+ 
+  PULLIBRARYOFFSET    This parameter is an output parameter used in support of
+                      Makefile creation. The interface is expected to place in
+                      this area the offset within the Link Options area where a
+                      null delimited list of library names are. For example:
+ 
+                        OS2.LIB+COMPILER.LIB+USER.LIB
+ 
+                      If a library list is not supplied. The interface must
+                      return 0xFFFFFFFF.
+ 
+  The returns codes are as follows:
+ 
+      0 - SUCCESS
+ 
+      1 - CANCEL was pressed
+ 
+      2 - ERROR occurred (the DLL will have displayed an appropriate error
+      message).
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  12
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  INTERFACE TO ACQUIRE DEBUG OPTIONS AND INVOCATION STRING
+  ________________________________________________________
+ 
+  The entrypoint "GETDEBUGOPTS" is invoked under two different circumstances in
+  response to a user action bar request. When the user selects
+  "Options"/"Debug" from the action bar, or "Debug Options" from project
+  creation/change, the entry point is invoked to acquire a set of debug options
+  to associate with the current project. When the user selects "Actions/Debug"
+  from the action bar, the interface is invoked to build a string that will be
+  passed to the linker when it is invoked.  This interface will ONLY be invoked
+  in this situation if debug options have been set for that project. If no
+  options exist then the shell uses the default invocation string provided in
+  the language profile and invokes the debugger.
+ 
+  The interface must be provided in a DLL. The interface can be either 32-bit
+  or 16-bit (with the caveat that all interfaces in the DLL must be of the same
+  type, either all 32-bit or all 16-bit).  The DLL name type is provided in the
+  language profile supplied by the language developer.  If the interface is
+  16-bit it must be coded to use the FAR PASCAL linkage convention. If it is
+  32-bit it must abide by the OS/2 V2.0 System linkage conventions.
+ 
+ 
+  INVOCATION SYNTAX
+ 
+             LONG GETDEBUGOPTS(HWND    hWorkFrame,
+                               PVOID   pvDebugOptions,
+                               ULONG * pulDebugOptionsLgth,
+                               PSZ     pszDefaultInvocationString,
+                               PSZ     pszInvocationString,
+                               ULONG   ulInvocationAreaSize
+                               HMODULE hModHandle,
+                               ULONG * pulAction,
+                               PSZ     pszProject)
+ 
+ 
+  GETDEBUGOPTS is invoked with FAR PASCAL linkage if the entry point is speci-
+  fied as 16-bit. All pointers must be FAR pointers.  If the interface is spec-
+  ified as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All
+  pointers are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+  HWORKFRAME          Handle of the WorkFrame primary window.
+ 
+  PVDEBUGOPTIONS      Pointer to an area containing the existing debugger
+                      options.  This area is of size pulDebugOptionsLgth. This
+                      area contains existing options if the USEDEFAULTS bit in
+                      pulAction is NOT set.  This area should be updated with
+                      the new debugger options after interaction with the user.
+ 
+  PULDEBUGOPTIONSLGTH This parameter is an input/output field. On input it
+                      specifies the size of the area provided for storing the
+                      options.  On output, the interface is expected to specify
+                      the actual size of the options structure.  This size is
+                      used when writing the options to the project file.
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  13
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box. In the current release of the
+                      shell the maximum size is fixed at 400 bytes.
+ 
+  PSZDEFAULTINVOCATIONSTRING This is the default debugger invocation string
+                      provided in the language profile. It can be used to ini-
+                      tialize any input areas.
+ 
+                      The WorkFrame accepts a meta language to support param-
+                      eter substitution.
+ 
+                      o   %o - indicates that the current project's target name
+                          should be substituted here
+ 
+                      o   %r - indicates that the run options associated with
+                          the current project should be substituted here.
+ 
+  PSZINVOCATIONSTRING This is the area provided to hold the debugger invocation
+                      string.  Its size is ulInvocationAreaSize. This string
+                      must be ASCIIZ, ie nul-delimited. It should also include
+                      the substitution tokens described for
+                      pszDefaultInvocationString.
+ 
+  ULINVOCATIONAREASIZE This is an input parameter only. It provides the size of
+                      the data area provided to hold the invocation string.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box. In the current release of the
+                      WorkFrame the maximum size is fixed at 400 bytes.
+ 
+  HMODHANDLE          This is the handle of the Debug Options DLL. This param-
+                      eter should be used to access any resources bound to the
+                      DLL (ie string tables, dialogs).
+ 
+  PULACTION           Input/Output area for communicating desired actions with
+                      the WorkFrame. The options and the bit settings are as
+                      follows:
+ 
+                      o   STOREOPTS   0x0001
+ 
+                          This bit is set by the Debug DLL if the user has
+                          requested that the options be saved with the project.
+                          The WorkFrame will test this bit when control is
+                          returned during "Options/Debug" processing.
+ 
+                      o   NODLGS      0x0002
+ 
+                          This bit is set if the WorkFrame wishes the interface
+                          to not display a dialog, but to simply return an
+                          invocation string. This bit is set during
+                          "Actions/Debug" processing.
+ 
+                      o   USEDEFAULTS 0x0004
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  14
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                          This bit is set if the debug options have not previ-
+                          ously existed for this Project. The area being passed
+                          to the interface will be uninitialized. The interface
+                          should set up all options based on the default debug
+                          string passed as a parameter.  This bit is never set
+                          in response to a "Actions/Debug" request. In this
+                          case the WorkFrame uses the default invocation string
+                          provided in the language profile.
+ 
+  PSZPROJECT          This is the up to 100 character description of the
+                      project for which the debug options are required. The
+                      interface may display this description on its dialogs.
+ 
+  The returns codes are as follows:
+ 
+      0 - SUCCESS
+ 
+      1 - CANCEL was pressed
+ 
+      2 - ERROR occurred (the DLL will have displayed an appropriate error
+      message).
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  15
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  INTERFACE TO ACQUIRE MAKE OPTIONS AND INVOCATION STRING
+  _______________________________________________________
+ 
+  The entrypoint "GETMAKEOPTS" is invoked under two different circumstances in
+  response to a user action bar request. When the user selects "Options/Make"
+  from the action bar, or "Make Options" from project creation/change, the
+  entry point is invoked to acquire a set of make options to associate with the
+  current project. When the user selects "Actions/Make" from the action bar,
+  the interface is invoked to build a string that will be passed to the make
+  utility when it is invoked.  This interface will ONLY be invoked in this sit-
+  uation if make options have been set for that project. If no options exist
+  then the WorkFrame uses the default invocation string provided in the Lan-
+  guage Profile and invokes the make utility.
+ 
+  The interface must be provided in a DLL. The interface can be either 32-bit
+  or 16-bit (with the caveat that all interfaces in the DLL must be of the same
+  type, either all 32-bit or all 16-bit).  The DLL name, and interface type is
+  provided in the language profile supplied by the language developer.  If the
+  interface is 16-bit it must be coded to use the FAR PASCAL linkage conven-
+  tion. If it is 32-bit it must abide by the OS/2 V2.0 System linkage con-
+  ventions.
+ 
+ 
+  INVOCATION SYNTAX
+ 
+             LONG  GETMAKEOPTS(HWND    hWorkFrame,
+                               PVOID   pvMakeOptions,
+                               ULONG * pulMakeOptionsLgth,
+                               PSZ     pszDefaultInvocationString,
+                               PSZ     pszInvocationString,
+                               ULONG   ulInvocationAreaSize
+                               HMODULE hModHandle,
+                               ULONG * pulAction,
+                               PSZ     pszProject)
+ 
+ 
+  GETMAKEOPTS is invoked with FAR PASCAL linkage if the entry point is speci-
+  fied as 16-bit. All pointers must be FAR pointers.  If the interface is spec-
+  ified as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All
+  pointers are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+  HWORKFRAME          Handle of the WorkFrame primary window.
+ 
+  PVMAKEOPTIONS       Pointer to an area containing the existing make options.
+                      This area is of size pulMakeOptionsLgth. This area con-
+                      tains existing options if the USEDEFAULTS bit in
+                      pulAction is NOT set.  This area should be updated with
+                      the new make options after interaction with the user.
+ 
+  PULMAKEOPTIONSLGTH  This parameter is an input/output field. On input it
+                      specifies the size of the area provided for storing the
+                      options.  On output, the interface is expected to specify
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  16
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      the actual size of the options structure.  This size is
+                      used when writing the options to the project file.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box. In the current release of the
+                      shell the maximum size is fixed at 400 bytes.
+ 
+  PSZDEFAULTINVOCATIONSTRING This is the default make invocation string pro-
+                      vided in the language profile. It can be used to ini-
+                      tialize any input areas.
+ 
+                      The shell accepts a meta language to support parameter
+                      substitution.
+ 
+                      o   %m - indicates that the current project's make file
+                          name should be substituted here.
+ 
+                      o   %o - indicates that the current project's executable
+                          name should be substituted here
+ 
+  PSZINVOCATIONSTRING This is the area provided to hold the make invocation
+                      string.  Its size is ulInvocationAreaSize. This string
+                      must be ASCIIZ, ie nul-delimited. It should also include
+                      the substitution tokens described for
+                      pszDefaultInvocationString.
+ 
+  ULINVOCATIONAREASIZE This is an input parameter only. It provides the size of
+                      the data area provided to hold the invocation string.
+ 
+                      If the size is too small, the interface is expected to
+                      display a message box. In the current release of the
+                      WorkFrame the maximum size is fixed at 400 bytes.
+ 
+  HMODHANDLE          This is the handle of the Make Options DLL. This param-
+                      eter should be used to access any resources bound to the
+                      DLL (ie string tables, dialogs).
+ 
+  PULACTION           Input/Output area for communicating desired actions with
+                      the WorkFrame. The options and the bit settings are as
+                      follows:
+ 
+                      o   STOREOPTS   0x0001
+ 
+                          This bit is set by the Make DLL if the user has
+                          requested that the options be saved with the project.
+                          The WorkFrame will test this bit when control is
+                          returned during "Options/Make" processing.
+ 
+                      o   NODLGS      0x0002
+ 
+                          This bit is set if the WorkFrame wishes the interface
+                          to not display a dialog, but to simply return an
+                          invocation string. This bit is set during
+                          "Actions/Make" processing.
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  17
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      o   USEDEFAULTS 0x0004
+ 
+                          This bit is set if the make options have not previ-
+                          ously existed for this Project. The area being passed
+                          to the interface will be uninitialized. The interface
+                          should set up all options based on the default make
+                          string passed as a parameter.  This bit is never set
+                          in response to a "Actions/Make" request. In this case
+                          the WorkFrame uses the default invocation string pro-
+                          vided in the language profile.
+ 
+  PSZPROJECT          This is the up to 100 character description of the
+                      project for which the debug options are required. The
+                      interface may display this description on its dialogs.
+ 
+  The returns codes are as follows:
+ 
+      0 - SUCCESS
+ 
+      1 - CANCEL was pressed
+ 
+      2 - ERROR occurred (the DLL will have displayed an appropriate error
+      message).
+ 
+ 
+  INTERFACES IN SUPPORT OF COMPILER ERROR MESSAGES.,
+  __________________________________________________
+ 
+ 
+  INTERFACE TO PARSE A COMPILER ERROR MESSAGE,
+ 
+  The entrypoint "PARSEERROR" in the Compiler Options DLL is invoked during
+  processing of the output of a Compile,Make or Build operation. The interface
+  is provided with a line of output from the compiler and is expected to return
+  the filename and line number associated with the error message on that line.
+ 
+  The interface must be provided in the Compiler Options DLL.  The interface
+  can in the Compiler Options DLL be the same type.  If the interface is 16-bit
+  it must be coded to use the FAR PASCAL linkage convention. If it is 32-bit it
+  must abide by the OS/2 V2.0 System linkage conventions.
+ 
+ 
+  Invocation Syntax
+ 
+|            LONG PARSEERROR(HWND    hwndErrorBox,
+                            USHORT *pusStartline,
+                            USHORT *pusEndline,
+                            HWND    hwndFilenames,
+                            USHORT *pusCurrentFile,
+                            PVOID   pvCompilerOptions,
+                            ULONG * pulAction)
+ 
+  PARSEERROR is invoked with FAR PASCAL linkage if the entry point is specified
+  as 16-bit. All pointers must be FAR pointers.  If the interface is specified
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  18
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All pointers
+  are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+  HWNDERRORBOX        The handle of a listbox containing all output from the
+                      Make/Compile or Build operation.
+ 
+  PUSSTARTLINE        The first line in hwndErrorBox for which the error infor-
+                      mation applies. The interface must update this field.
+ 
+  PUSENDLINE          The last line in hwndErrorBox for which the error infor-
+                      mation applies. The interface must update this field.
+ 
+                      The interface may process the entire listbox, in which
+                      case pusStartline would contain zero and pusEndline would
+                      contain the last line in the listbox) or the interface
+                      may restrict the range to a particular range (for
+                      example, a single compile in a listbox that contains the
+                      output of many compilations). The WorkFrame uses this
+                      information in determining whether it should re-invoke
+                      the interface. If the user clicks on a line in this
+                      range, the WorkFrame will process the information. If the
+                      line selected is not in the range the interface will be
+                      re-invoked.
+ 
+  HWNDFILENAMES       The handle of a listbox into which the interface should
+                      insert the name of each source file containing errors.
+                      The index returned from the insertion message will be
+                      used in the encoding of the error. This is described
+                      later.                                        .
+ 
+  PUSCURRENTFILE      The interface should place the index into hwndFilenames
+                      corresponding to the first selected file in this field.
+                      The editor will be invoked initially for this file.
+ 
+  PVCOMPILEROPTIONS   Pointer to an area containing the existing compiler
+                      options.  This area contains existing options if the
+                      USEDEFAULTS bit in pulAction is NOT set.
+ 
+  PULACTION           Input area used only to define the validity of the
+                      options.  The options and the bit settings are as
+                      follows:
+ 
+                      o   USEDEFAULTS 0x0004
+ 
+                          This bit is set if the compile options have not pre-
+                          viously existed for this Project. The area being
+                          passed to the interface will be uninitialized.
+ 
+  The returns codes are as follows:
+ 
+      0 - SUCCESS
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  19
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      1 - ERROR occurred (No error message should be displayed)
+ 
+  Processing might proceed as follows:
+ 
+ 
+  The line selected by the user will be available by issuing a WinSendMessage
+  call for LM_QUERYSELECTION. For example,
+ 
+ 
+       if ((sIndex= SHORT1FROMMR( WinSendMsg(hwndErrorBox,
+                                  LM_QUERYSELECTION,
+                                  (MPARAM)NULL,
+                                  (MPARAM)NULL)))
+                     == LIT_NONE)
+          return ERROR_CODE;
+ 
+ 
+  The interface can get the text of the line and determine whether it contains
+  a valid error message. For example,
+ 
+ 
+       WinSendMsg(hwndErrorBox,
+                  LM_QUERYITEMTEXT,
+                  MPFROM2SHORT(sIndex,sizeof(work)),
+                  MPFROMP(work));
+ 
+       rc=Parsetheline(work,infostructure);
+ 
+  If the line contains an error message, the interface should record the source
+  filename, the line number and the offset within the line. If the latter is
+  not available, zero should be used.  The offset is in bytes, not characters.
+  If tabs are present they are counted only as one byte. The filename should be
+  inserted into the hwndFilenames listbox and the index used in message
+  encoding.  The interface should first ensure that an index was not previously
+  assigned for this file. One way this might be done is:
+ 
+       insertIndex = SHORT1FROMMR(
+                       WinSendMsg(hwndFilenames,
+                                  LM_SEARCHSTRING,
+                                  MPFROM2SHORT(LSS_CASESENSITIVE,LIT_FIRST),
+                                  MPFROMP(pszSourceFile)));
+ 
+ 
+       if (insertIndex == LIT_ERROR)
+          return ERROR_CODE;
+ 
+       if (insertIndex == LIT_NONE)
+           insertIndex = SHORT1FROMMR(WinSendMsg(hwndFilenames,
+                                      LM_INSERTITEM,
+                                      MPFROMSHORT(LIT_END),
+                                      (MPARAM)pszSourceFile));
+ 
+ 
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  20
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  The index returned for the first file associated with the selected line
+  should be returned in the pusCurrentFile field.
+ 
+  The information about the error is encoded and placed in the tag field asso-
+  ciated with the hwndErrorBox item. The encoding is of the form:
+ 
+             USHORT  errorLine  ;
+             UCHAR   offset     ;
+             UCHAR   fileNumber ;
+ 
+  Any line not containing an error message should be left alone (ie it will
+  contain a zero in the tag/handle field).
+ 
+  For example,
+ 
+       typedef  union  _TAGPARAM
+          {
+          unsigned long  tagParam ;
+          struct
+             {
+             USHORT  errorLine  ;
+             char    offset     ;
+             char    fileNumber ;
+             } sub  ;
+          } TAGPARAM;
+ 
+       TAGPARAM  mpParam;
+ 
+       mpParam.sub.errorLine   = lineNumber  ;
+       mpParam.sub.offset      = 0           ;
+       mpParam.sub.fileNumber  = insertIndex ;
+ 
+       WinSendMsg(hwndErrorBox,
+                  LM_SETITEMHANDLE,
+                  MPFROMSHORT(sIndex),
+                  (MPARAM)(ULONG)(mpParam.tagParam));
+ 
+ 
+  Processing would then continue forward and backward from the selected line,
+  finding a range of lines in the hwndErrorBox for which the item tags are
+  valid. That range should be returned in pusStartline and pusEndline.
+ 
+ 
+| INTERFACE TO OBTAIN THE ERROR MESSAGE HELP FILE NAME
+ 
+| The WorkFrame will invoke the QUERYHELPFILE interface after invoking the DLL
+| to parse the error messages. The interface is expected to place the string
+| representing the IPF .HLP file in the area provided and return TRUE if help
+| is supported. Returning FALSE indicates that error message help is not sup-
+| ported.
+ 
+ 
+| Invocation Syntax
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  21
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+|            BOOL QUERYHELPFILE(PSZ  pszLibrary);
+ 
+ 
+| QUERYHELPFILE is invoked with FAR PASCAL linkage if the entry point is speci-
+| fied as 16-bit. All pointers must be FAR pointers.  If the interface is spec-
+| ified as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All
+| pointers are assumed to be FLAT.
+ 
+| The parameter is as follows:
+ 
+| PSZLIBRARY          Output area into which the name of the .HLP file is to be
+|                     placed.
+ 
+|                     For example, DDE4ERRS.HLP
+ 
+| The returns codes are as follows:
+ 
+|     TRUE - A library name has been provided
+ 
+|     FALSE- A library name has NOT been provided
+ 
+ 
+| INTERFACE TO PROVIDE A RESOURCE ID FOR A GIVEN ERROR MESSAGE
+ 
+| Whenever the WorkFrame requires the resource id corresponding to a particular
+| error message line it will invoke the QUERYRESOURCEID interface to return the
+| resourceid corresponding to the error message contained in the string being
+| passed. It is the responsibility of the interface to parse the error line and
+| determine what resource id should be returned. All resource ids must be
+| greater than 20000 since values lower than that are reserved for use by the
+| editor.
+ 
+ 
+| Invocation Syntax
+ 
+ 
+|            ULONG QUERYRESOURCEID(PSZ  pszErrorLine);
+ 
+ 
+| QUERYRESOURCEID is invoked with FAR PASCAL linkage if the entry point is
+| specified as 16-bit. All pointers must be FAR pointers.  If the interface is
+| specified as 32-bit then it will be invoked with OS/2 V2.0 System linkage.
+| All pointers are assumed to be FLAT.
+ 
+| The parameter is as follows:
+ 
+| PSZERRORLINE        Input area containing the error message line to be
+|                     parsed.
+ 
+|                     For example,
+ 
+|                       PMLINES.C(176) XXX4023W Warning,You have an error
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  22
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+| The returns codes are as follows:
+ 
+|     0 - No resourceid is provided
+ 
+|     >20000 resouce id to use (by convention it must be greater than 20000 and
+|     correspond to the resource id in the .HLP file).
+ 
+ 
+  INTERFACES IN SUPPORT OF MAKE FILE CREATION
+  ___________________________________________
+ 
+  In order to provide language independence in the make file creation process,
+  the utility must call the language DLL for certain types of processing. When
+  it requires the invocation string it will call the COMPILEOPTS entrypoint in
+  the compiler options DLL. It uses the language mask stored in the Language
+  Profile to identify valid source files. When it needs to parse a file to
+  determine its dependencies (ie included files), it calls the FINDINCLUDE
+  entrypoint in the compiler options DLL. This entrypoint will acquire storage
+  in support of this processing. When the make file creation process is fin-
+  ished, it will call the FREEMEMORY entry point to allow the DLL to free all
+  acquired resources.
+ 
+ 
+  INTERFACE TO BUILD SOURCE FILE INCLUDE DEPENDENCIES,
+ 
+  The entrypoint "FINDINCLUDE" in the Compiler Options DLL is invoked during
+  the creation of a make file to parse a source file for any dependencies. It
+  is expected to return an array of dependent files, an array of included files
+  for which a dependency should not be generated and an array of messages to be
+  displayed.
+ 
+  The interface must be provided in the Compiler Options DLL.  The interface
+  can be either 32-bit or 16-bit (with the caveat that all interfaces in the
+  DLL must be of the same type, either all 32-bit or all 16-bit).  If the
+  interface is 16-bit it must be coded to use the FAR PASCAL linkage conven-
+  tion. If it is 32-bit it must abide by the OS/2 V2.0 System linkage con-
+  ventions.
+ 
+ 
+  INVOCATION SYNTAX
+ 
+             LONG  FINDINCLUDE (PSZ * * ppszNonDependentIncludes,
+                                PSZ * * ppszDependentIncludes,
+                                PSZ * * ppszErrorMessages,
+                                PSZ     pszFileName,
+                                PVOID   pvCompilerOptions);
+ 
+ 
+  FINDINCLUDE is invoked with FAR PASCAL linkage if the entry point is speci-
+  fied as 16-bit. All pointers must be FAR pointers.  If the interface is spec-
+  ified as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All
+  pointers are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  23
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  PPSZNONDEPENDENTINCLUDES The make file creation will initially set up a 4
+                      byte work area as NULL. The interface is expected to
+                      acquire storage to hold an array of pointers to
+                      filenames. The convention is that the last pointer is
+                      NULL.  Each element is to point to a filename of any
+                      included file that you want displayed in the makefile as
+                      a comment but not included in the dependency list.  In C,
+                      for example, this might correspond to any system include
+                      files, eg <stdlib.h>.
+ 
+                      If there are no files included in the source that meet
+                      this criteria then return NULL in the first pointer
+                      location. Refer to -- Fig 'FIG35' unknown --. for a
+                      diagram of this array.  You may reuse this storage on
+                      subsequent invocations.
+ 
+                      If the filename is NULL, only the first element of the
+                      array is used.  The make file generation tool assumes
+                      that it points to a search path for the non-dependant
+                      includes, in a syntax acceptable to the make utility, see
+                      -- Heading 'SPTH' unknown -- for a description.
+ 
+  PPSZDEPENDENTINCLUDES The make file creation will initially set up a 4 byte
+                      work area as NULL. The interface is expected to acquire
+                      storage to hold an array of pointers to filenames. The
+                      convention is that the last pointer is NULL.  Each
+                      element is to point to a filename of any included file
+                      that you want generated in the makefile as a dependency.
+                      Do not read any of the included files, the interface will
+                      be reinvoked later using each of the dependent files to
+                      find any nested dependencies.
+ 
+                      If there are no files included in the source that meet
+                      this criteria then return NULL in the first pointer
+                      location. Refer to -- Fig 'FIG35' unknown --. for a
+                      diagram of this array.  You may reuse this storage on
+                      subsequent invocations.
+ 
+                      If the filename is NULL, only the first element of the
+                      array is used.  The make file generation tool assumes
+                      that it points to a search path for the dependant
+                      includes, in a syntax acceptable to the make utility, see
+                      -- Heading 'SPTH' unknown -- for a description.
+ 
+  PPSZERRORMESSAGES   The make file creation will initially set up a 4 byte
+                      work area as NULL. The interface is expected to acquire
+                      storage to hold an array of pointers to any error mes-
+                      sages. The convention is that the last pointer is NULL.
+                      Each element is to point to an error message.  If there
+                      are no error messages then return NULL in the first
+                      pointer location and return SUCCESS.  If there are error
+                      messages then return ERROR.
+ 
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  24
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  PSZFILENAME         This is the name of the file to be opened and parsed.
+ 
+  PVCOMPILEROPTIONS   This is a pointer to the current compiler options struc-
+                      ture, in case this information is useful in parsing the
+                      file.
+ 
+  The returns codes are as follows:
+ 
+      0 - SUCCESS
+ 
+      1 - ERROR occurred
+ 
+ 
+  Search Path Specification
+ 
+  The search path is a mixture of directory names and environment variables,
+  separated by semicolons. Environment variables are specified as symbolic var-
+  iables as used by the Make utility.  For example,
+ 
+  To search the current directory and the directories given by the environment
+  variable "INCLUDE" specify:
+ 
+    ;$(INCLUDE)
+ 
+  To search directories E:\FRED and F:\GEORGE specify,
+ 
+         E:\FRED;F:\GEORGE
+ 
+  To search paths given by the environment variables FRED and GEORGE specify,
+ 
+         $(FRED);$(GEORGE)
+ 
+ 
+  INTERFACE TO FREE ACQUIRED MEMORY
+ 
+  The entrypoint "FREEMEMORY" in the Compiler Options DLL is invoked after make
+  file creation processing has finished processing.  It passes a pointer to
+  each of the arrays for which storage might have been acquired. The interface
+  should free all acquired memory.
+ 
+  The interface must be provided in the Compiler Options DLL.  The interface
+  can be either 32-bit or 16-bit, with the restriction that all interfaces in
+  the Compiler Options DLL be the same type.  If the interface is 16-bit it
+  must be coded to use the FAR PASCAL linkage convention. If it is 32-bit it
+  must abide by the OS/2 V2.0 System linkage conventions.
+ 
+ 
+ 
+  INVOCATION SYNTAX
+ 
+              VOID FREEMEMORY  (PSZ *  ppszNonDependentIncludes,
+                                PSZ *  ppszDependentIncludes,
+                                PSZ *  ppszErrorMessages);
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  25
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  FREEMEMORY is invoked with FAR PASCAL linkage if the entry point is specified
+  as 16-bit. All pointers must be FAR pointers.  If the interface is specified
+  as 32-bit then it will be invoked with OS/2 V2.0 System linkage. All pointers
+  are assumed to be FLAT.
+ 
+  The parameters are as follows:
+ 
+  PPSZNONDEPENDENTINCLUDES A pointer to the array of pointers. Each active
+                      element of the array should be freed, as well as
+                      ppszNonDependentIncludes.
+ 
+  PPSZDEPENDENTINCLUDES A pointer to the array of pointers. Each active element
+                      of the array should be freed, as well as
+                      ppszNonDependentIncludes.
+ 
+  PPSZERRORMESSAGES   A pointer to the array of pointers. Each active element
+                      of the array should be freed, as well as
+                      ppszNonDependentIncludes.
+ 
+  The interface does not return anything.
+ 
+ 
+  -----------------------------------------------------------------------------
+ 
+  Pointer on Stack
+   +--------+
+   |        |
+   +--------+
+       |                   Array of Ptrs
+       |                    acquired by
+       V                    FINDINCLUDE
+   +--------+               +--------+           +-------------------+
+   |        |-------------> |        |---------> |  search path      |
+   +--------+               |--------|           +-------------------+
+                            |        |---------> +-------------------+
+   Pointer                  |--------|           |  filename 1       |
+   in Make                  |  NULL  |           +-------------------+
+   File Create              |--------|
+   Storage                  |        |
+                            |--------|
+                            |        |
+                            |--------|
+                            |        |
+                            +--------+
+ 
+ 
+  -----------------------------------------------------------------------------
+  Figure 4. FINDINCLUDE Pointer Overview
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                      WorkFrame Programming Interfaces for Compiler Writers  26
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  WORKFRAME INTERFACES TO THE EDITOR
+  __________________________________
+ 
+ 
+ 
+ 
+ 
+  OVERVIEW OF COMPILER/WORKFRAME/EDITOR ERROR MESSAGE HANDLING
+  ____________________________________________________________
+ 
+  The WorkFrame will communicate compilation errors to the Editor by using DDE
+  calls. An overview of the interaction between compiler, WorkFrame and Editor
+  are depicted in -- Fig 'WBEDIT' unknown --
+ 
+  1.  In response to a Make/Compile or Build Action, the WorkFrame invokes the
+      Make utility, the Compiler or the Linker via DosExecPgm.
+ 
+  2.  The utility writes its output to one of the Standard I/O handles (Stdout
+      or Stderr). These handles have been redirected back to the WorkFrame and
+      the output is displayed in a listbox.
+ 
+| 3.  When the user double clicks on an error line(1) in the listbox for the
+      first time, the WorkFrame will invoke the compiler DLL to find all error
+      messages for all files in the listbox.
+ 
+| 4.  The compiler DLL returns this information to the WorkFrame, at that point
+|     the WorkFrame will invoke the DLL to determine the name of the error
+|     message help file, if one exists.
+ 
+  5.  The WorkFrame then starts the Editor for the source file identified in
+|     the error message clicked upon, (via DosStartSession)(2).  and issues a
+      WinDdeInitiate call to establish a conversation with the Editor.
+ 
+  6.  Once the Editor is initialized (having identified itself as the server
+      for that file), it will receive the connection request for that file. It
+      should accept the request by sending a WinDdeRespond message.
+ 
+  7.  Once the acceptance of the connection is received, the WorkFrame will
+      send a WM_DDE_EXECUTE message to tell the Editor to Initialize passing it
+|     information about all source lines in error, and the name of the help
+|     file (if one is provided).  This message also implies a WM_DDE_ADVICE
+      message, confirming that the Editor may send WM_DDE_DATA requests (see
+      below).
+ 
+  8.  The Editor should send a WM_DDE_ACK message back confirming acceptance of
+      the command.
+ 
+ 
+  ---------------
+ 
+| (1) This process can also be initiated by selecting a line and beginning a
+|     drag operation.
+ 
+| (2) If a drag operation is in progress then the WorkFrame will issue a
+|     DrgDrag request and if a drop is accepted, enable itself for DDE communi-
+|     cation
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  27
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  9.  As the user continues to double click on different error messages in the
+      listbox, the WorkFrame will send a WM_DDE_EXECUTE message to tell the
+      Editor to "Goto" a particular line (ie original source line), passing it
+      information about that particular line.
+ 
+  10. The Editor should send a WM_DDE_ACK message back confirming acceptance of
+      the command.
+ 
+  11. The Editor may send a WM_DDE_DATA request to ask for information relating
+      to a particular error line. This will cause the WorkFrame to send a
+      WM_DDE_EXECUTE "Goto" message (see point 9 above).
+ 
+  12. If the listbox dialog is terminated by the user, the WorkFrame will send
+      the Editor a WM_DDE_TERMINATE message.  If the user terminates the Edit
+      session the Editor will send the WorkFrame a WM_DDE_TERMINATE message.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  28
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  +---------------------------------------------------------------------------+
+  |                                                                           |
+  |                    +---------+        +---------+     5.     +---------+  |
+  |                    | Make/   |   1.   |         |----------->|         |  |
+  |   +--------+  2.   | Compiler|<-------|         |     6.     |         |  |
+  |   |        |<------| Linker  |        |         |<-----------|         |  |
+  |   |        |       |         |        |         |            |         |  |
+  |   |Standard|       +---------+        |         |     7.     |         |  |
+  |   |Out/Err |                          |         |----------->|         |  |
+  |   |Listbox |       +---------+        |         |     8.     |         |  |
+  |   |        |       |         |        |         |<-----------|         |  |
+  |   |        |-----> |Compiler |   3.   |  SHELL  |            | EDITOR  |  |
+  |   +--------+       |  Error  |<-------|         |     9.     |         |  |
+  |                    | Parsing |        |         |----------->|         |  |
+  |                    |   DLL   |        |         |    10.     |         |  |
+  |                    |         |        |         |<-----------|         |  |
+  |                    +---------+        |         |            |         |  |
+  |                         |             |         |    11.     |         |  |
+  |                         V 4.          |         |<-----------|         |  |
+  |                    +---------+        |         |            |         |  |
+  |                    | Error   |        |         |    12.     |         |  |
+  |                    | Info.   |------->|         |<---------->|         |  |
+  |                    |         |        |         |            |         |  |
+  |                    +---------+        +---------+            +---------+  |
+  |                                                                           |
+  |                                                                           |
+  +---------------------------------------------------------------------------+
+  Figure 5. Overview of Compiler/WorkFrame/Editor Interaction
+ 
+  WORKFRAME/EDITOR INTERACTION FOR COMPILER ERROR MESSAGES
+  ________________________________________________________
+ 
+  A description of the interaction and the format of the messages follows:
+ 
+  1.  In response to a user action, the WorkFrame will start the editor via
+      DosStartSession, passing it the name of the file to be edited.
+ 
+  2.  The Editor must register itself as a Server for that file specifying an
+      application name of "WB Server" and using the filename as the topic name.
+ 
+      That is
+ 
+              WinDdeInitiate(hwnd, "WB Editor", szBuf);
+ 
+              where:
+                     hwnd  - Editor window handle
+                     szBuf - Name of the file being edited.
+ 
+  3.  The WorkFrame will then try to establish a DDE session. The request will
+      come to the Editor as a WM_DDE_INITIATE message. Logic can look as
+      follows:
+ 
+ 
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  29
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+            case  WM_DDE_INITIATE :
+            {
+              PDDEINIT pddei = NULL;               /* DDE init struct ptr   */
+                 /* is this our own broadcast? then don't process it */
+              if ((HWND)mp1 == hwnd)
+                break;
+ 
+              pddei = (PDDEINIT)mp2;
+ 
+              if (!fConnected)   /* could keep track of whether you are connected
+                                    already and handle only one connection */
+                {
+ 
+           /* check to see if the request is from the WorkFrame */
+                if ((strcmp("WB Editor", pddei->pszAppName) == 0) &&
+           /* check to see if the request is for the filename stored prev */
+                 (strcmp(szBuf, pddei->pszTopic) == 0))
+                  {
+                    hwndDDEClient = (HWND)mp1; /* store client window handle */
+ 
+                    /* reply that the connection is accepted by passing filename
+                       as the topic and "WB Editor" as the application name */
+                    WinDdeRespond((HWND)mp1, hwnd,  "WB Editor", szBuf);
+                    fConnected = TRUE;  /* conversation established   */
+                  }
+                }
+              DosFreeSeg(PDDEITOSEL(pddei));   /* REQUIRED see msj v4n3 may 89 */
+              break;
+            }
+ 
+  4.  Once the WorkFrame receives the acknowledgement it will send an initiate
+      message, passing a list of all the lines in error. The Editor could do
+      such things as initializing variables to keep track of original line
+      numbers or colorizing all lines-in-error.
+ 
+      The message will come in as a WM_DDE_EXECUTE.  The format of the message
+      is as follows:
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  30
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+            ULONG   cbData;        /* size of structure + item + data */
+            USHORT  fsStatus;      /* can be ignored */
+            USHORT  usFormat;      /* can be ignored */
+            USHORT  offszItemName; /* offset to message type "Initialize" */
+            USHORT  offabData;     /* offset to data */
+            CHAR    message[];     /* "Initialize"   - ASCIIZ */
+            ULONG   errorcount     /* count of number of errors to follow */
+            ERRSTR  errors[] ;     /* list of source lines in error */
+|           ULONG   textlength  ;  /* length of library name   (not including */
+|                                  /* the terminating NULL)                   */
+|           char    libraryname[]; /* Asciiz text of library name          */
+ 
+ 
+        where ERRSTR is a structure consisting of:
+ 
+        typedef _errstr
+           {
+            ULONG errorline;
+            ULONG offset;
+            ULONG length;
+            ULONG magic_cookie;
+           } ERRSTR;
+ 
+ 
+      The "magic cookie" field is really the first line in the error listbox
+      relating to this error. This field can be used in a message from the
+      Editor to the WorkFrame (a WM_DDE_DATA message) to ask the shell to send
+      a "Goto" message for this error. This mechanism allows the Editor to
+      implement a "Next Error" function amd get the error message text related
+      to that error. The errorline and offset fields are provided by the com-
+      piler error message parser. In the first release the errorline will be in
+      the range 1 through 65535 and the offset will be in the range 0 through
+      255. The length field provides information to aid in error highlighting.
+      It tells the editor to highlight the line starting at offset for length.
+|     In this release the length will always be zero.  The Editor should posi-
+|     tion the cursor at the offset provided within that line (if possible) and
+|     highlight portions of the line beginning at that offset (possibly until
+|     the next blank).
+ 
+|     If textlength is not zero then a library name is available.  The editor
+|     should associate this help file with the current help instance. The
+|     resource ids, by convention, contained in this file are greater than
+|     20000, leaving the lower 20000 resource ids for use by the editor.
+ 
+      The offszItemName field points to the  message array and the offabData
+      field points to the errorcount field. Two macros are provide by OS/2 to
+      convert these offsets into pointers. The pointers can then be used to
+      access the message type and data areas of the message.
+ 
+        #define DDES_PSZITEMNAME(pddes) \
+                (((PSZ)pddes) + ((PDDESTRUCT)pddes)->offszItemName)
+ 
+        #define DDES_PABDATA(pddes)       \
+                (((PBYTE)pddes) + ((PDDESTRUCT)pddes)->offabData)
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  31
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      Sample processing might be:
+ 
+            case  WM_DDE_EXECUTE :             /* one time DDE data request         */
+              pddeIn = (PDDESTRUCT)mp2;
+              if (pddeIn == NULL)
+                return ;
+ 
+                 /* Do we have an established conversation with this client? */
+ 
+              if (hwndDDEClient == (HWND)mp1)
+              {
+ 
+                      /* is it an initialize request */
+                if (strcmp(DDES_PSZITEMNAME(pddeIn), "Initialize") == 0)
+                {
+                  ULONG  * worklines;
+ 
+                  worklines= (ULONG *)DDES_PABDATA(pddeIn);
+                  errorcount=*worklines;
+                  ++worklines;
+ 
+                  /* now use the count of errors and each error line number
+                    to initialize the environment for subsequent goto messages */
+ 
+                  /* finally send the client an acknowledgement, it is the
+                     client's (ie WorkFrame's responsibility to free storage)
+ 
+                  WinDdePostMsg(hwndDDEClient,hwnd,WM_DDE_ACK,pddeIn);
+                }
+ 
+              return 0;
+              break;                           /* dde_request                       */
+ 
+  5.  After the conversation has started and the Editor has been initialized
+      for that file, every time the User double clicks on a line in error in
+      the Errors listbox a "Goto" message will be sent to the Editor. The
+      format of the "Goto" message is as follows:
+ 
+            ULONG   cbData;        /* size of structure + item + data */
+            USHORT  fsStatus;      /* can be ignored */
+            USHORT  usFormat;      /* can be ignored */
+            USHORT  offszItemName; /* offset to message type "Goto" */
+            USHORT  offabData;     /* offset to data */
+            CHAR    message[];     /* "Goto"   - ASCIIZ */
+            ULONG   errorline;     /* original source line in error       */
+            ULONG   errorsoffset;  /* offset of start of error within line */
+|           ULONG   resourceid  ;  /* resourceid of help in the help file  */
+|                                  /* corresponding to this message           */
+|           ULONG magic_cookie;
+            ULONG   textlength  ;  /* length of text to follow (not including */
+                                   /* the terminating NULL)                   */
+            char    errortext[];   /* Asciiz text of error message         */
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  32
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      The Editor should scroll the Edit session to the line in error and place
+      the mouse pointer at the offset within that line in error (the Editor
+      should allow for any tabs expansion since this offset will make no
+      assumption about tabs, ie a tab character is just another character on
+      the line). The Editor is also passed the text of the message so that it
+|     could be displayed in an information area.  The resource id (if it is not
+|     zero) can be used to display help for that error message (via
+|     WinPostMsg(hwndHelp,HM_DISPLAY_HELP...))
+ 
+      Sample code is as follows:
+ 
+            case  WM_DDE_EXECUTE :             /* one time DDE data request         */
+              pddeIn = (PDDESTRUCT)mp2;
+              if (pddeIn == NULL)
+                return ;
+ 
+                 /* Do we have an established conversation with this client? */
+ 
+              if (hwndDDEClient == (HWND)mp1)
+              {
+ 
+                      /* is it a goto request */
+                 if (strcmp(DDES_PSZITEMNAME(pddeIn), "Goto") == 0)
+                 {
+                   USHORT * work;
+ 
+                   work = (USHORT *)DDES_PABDATA(pddeIn);
+                   currenterror = *work;
+                   currentoffset = *(work+1);
+|                  currentresid  = *(work+2);
+|                  currentmagic  = *(work+3);
+|                  strcpy(szErrorLine,(PSZ)(work+5));
+                   /* then use the error line, offset and text to position
+                      the mouse pointer and scroll */
+ 
+                  /* finally send the client an acknowledgement, it is the
+                     client's (ie WorkFrame's responsibility to free storage)
+ 
+                  WinDdePostMsg(hwndDDEClient,hwnd,WM_DDE_ACK,pddeIn);
+                 }
+              }
+              return 0;
+              break;                           /* dde_request                       */
+ 
+      In response to a "Next Error" action the Editor can tell the WorkFrame to
+      Send a  "Goto" message containing the text of a particular message. The
+      format of the message is as follows:
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  33
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+            ULONG   cbData;        /* size of structure + item + data */
+            USHORT  fsStatus;      /* can be ignored */
+            USHORT  usFormat;      /* can be ignored */
+            USHORT  offszItemName; /* offset to message type "Goto" */
+            USHORT  offabData;     /* offset to data */
+            CHAR    message[];     /* "SendGoto"   - ASCIIZ */
+            ULONG   magiccookie;   /* identification of which error message */
+                                   /* information is required               */
+ 
+      The message must be "SendGoto" and the data must be the magiccookie. This
+      information is used to initialize the DDE structure .  and the
+      WM_DDE_DATA message is sent.
+ 
+          SEL sel = NULL;
+          PDDESTRUCT pdde = NULL;
+          USHORT rc = 0;
+          USHORT usSegSize ;
+          USHORT totalsize;
+ 
+          /**************************************************************************/
+          /* 1) Allocate a givable memory segment                                   */
+          /**************************************************************************/
+          usDataSize = 4;   /* the size of the magic cookie */
+          usSegSize = (USHORT)strlen("SendGoto")+1;
+          totalsize = sizeof(DDESTRUCT)+usDataSize+usSegSize;
+          rc = DosAllocSeg(totalsize,            // ddestruct + topic
+                           &sel, SEG_GIVEABLE);
+          if (rc && sel)                     // check api return code and selector
+            return  NULL;
+ 
+          /**************************************************************************/
+          /* 2) Fill in the new DDE structure                                       */
+          /**************************************************************************/
+ 
+          pdde = SELTOPDDES(sel);
+          memset((PVOID)pdde, 0, (size_t)usSegSize); // zero out memory
+          pdde->usFormat = usFormat;/* the WorkFrame doesn't care in R1) */
+          pdde->offszItemName = (USHORT)sizeof(DDESTRUCT);
+          memcpy(DDES_PSZITEMNAME(pdde), "SendGoto",usSegSize);
+          pdde->offabData = (USHORT)sizeof(DDESTRUCT)+usSegSize;
+          memcpy(DDES_PABDATA(pdde), magiccookie,usDataSize);
+          pdde->fsStatus = 0;           // set status flags
+          pdde->cbData = (ULONG)totalsize;
+ 
+          WinDdePostMsg(hwndDDEClient,hwnd,WM_DDE_DATA,pdde);
+ 
+      When the user terminates the error message listbox the shell will send a
+      terminate message to the Editor, so that the session can be disestab-
+      lished. The request will come in as a WM_DDE_TERMINATE message
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  34
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+            case  WM_DDE_TERMINATE :           /* DDE conversation termination
+                                                  request                           */
+              if (hwndDDEClient != (HWND)mp1)
+                                  break;
+              hwndDDEClient = NULL;        /* indicate that session is over */
+                                           /* agree on termination */
+              WinDdePostMsg((HWND)mp1, hwnd, WM_DDE_TERMINATE, NULL, TRUE);
+              fConnected = FALSE;
+              break;
+ 
+      If the user terminates the Edit session while the link is still active
+      the Editor must send the WorkFrame a message.
+ 
+ 
+            case  WM_CLOSE :
+              if (fConnected)
+                WinDdePostMsg(hwndDDEClient, hwnd, WM_DDE_TERMINATE, NULL,
+                   TRUE);
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                         WorkFrame Interfaces to the Editor  35
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  LANGUAGE PROFILE
+  ________________
+ 
+ 
+ 
+ 
+ 
+  The WorkFrame provides a utility for the general user or the Compiler devel-
+  oper to build or change a language profile.
+ 
+  The kind of information required is illustrated in -- Fig 'FIG4' unknown --
+  and is as follows:
+ 
+  o   File Name
+ 
+      The name entered will have the extension .PRF appended to it and should
+      be placed in the WorkFrame home directory. This name must be unique. It
+      is recommended that the filename being used is identical to the Language
+      Eyecatcher which must be unique as well.
+ 
+  o   Language Name
+ 
+      Any string you wish to use to represent the name of the language profile
+      in WorkFrame pulldowns and messages, for example.
+ 
+        IBM C/32 V1.0
+ 
+  o   Language Eyecatcher
+ 
+      A unique 8 character string to internally identify the language.  This
+      string is stored along with project options in the project control files.
+      This ensures that options are not passed to a language DLL by which they
+      were not created, If the eyecatcher is less than 8 characters it should
+      be padded with trailing spaces.
+ 
+      The Workbench project office is responsible for assigning eyecatchers to
+      participating compilers. All eyecatchers beginning with "IBM" are
+      reserved for IBM languages.  For example,
+ 
+        "IBMC32  "
+ 
+  o   Language Extension
+ 
+      This field identifies how the WorkFrame is to identify source files for
+      this compiler.  It must be of the form ".ext" where ext is the file
+      extension by which source file can be identified.  Multiple masks can be
+      specified if the compiler accepts multiple extension types.  In this case
+      the masks must be separated by a blank.  For example.
+ 
+ 
+           ".c .cpp .cv1"
+ 
+ 
+       Some extensions and characters are illegal.  The following shows the
+      list of illegal extensions and characters:
+ 
+ 
+                                                           Language Profile  36
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      Illegal Extensions:
+ 
+            "DEF"  "DEP"  "DLL" "EXE"  "HLP"  "IPF"
+            "LIB"  "MAK"  "MSG" "OBJ"  "RES"  "TXT"
+            "RC"
+ 
+      Illegal Characters:
+ 
+ 
+            <  > \  / *
+ 
+  o   Language compiler
+ 
+      The name of the executable supplied for the compiler.  For example,
+ 
+        CC.EXE
+ 
+  o   Compiler Options DLL
+ 
+      The name of the DLL supplied to acquire compiler options and invocation
+      string. Enter the name without a .DLL extension.  For example,
+ 
+        IBMSDEFL
+ 
+  o   Language linker
+ 
+      The name of the executable supplied for the linker.  For example,
+ 
+        LINK386.EXE
+ 
+  o   Linker Options DLL
+ 
+      The name of the DLL supplied to acquire link options and invocation
+      string. Enter the name without a .DLL extension.  For example,
+ 
+        IBMSLINK
+ 
+  o   Language maker
+ 
+      The name of the executable supplied for the make utility.  For example,
+ 
+        NMAKE.EXE
+ 
+  o   Make Options DLL
+ 
+      The name of the DLL supplied to acquire make options and invocation
+      string. Enter the name without a .DLL extension.  For example,
+ 
+        IBMSDEFL
+ 
+  o   Language debugger
+ 
+      The name of the executable supplied for the debugger.  For example,
+ 
+ 
+ 
+                                                           Language Profile  37
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        DEBUG.EXE
+ 
+  o   Debug Options DLL
+ 
+      The name of the DLL supplied to acquire debug options and invocation
+      string. Enter the name without a .DLL extension.  For example,
+ 
+        IBMSDEFL
+ 
+  o   Default make string
+ 
+      Default string to use, if the make options are not specified for a
+      project. The shell supports the following tokens for substitution.
+ 
+      -   %m - indicates that the current project's make file name should be
+          substituted here.
+ 
+      -   %o - indicates that the current project's executable name should be
+          substituted here
+ 
+  o   Default debug string
+ 
+      Default string to use, if the debug options are not specified for a
+      project. The shell supports the following tokens for substitution.
+ 
+      -   %o - indicates that the current project's executable name should be
+          substituted here
+ 
+      -   %r - indicates that the current project's run options should be sub-
+          stituted here.
+ 
+  o   Max Compiler size
+ 
+      Amount of storage to allocate to hold compiler options.
+ 
+  o   Max Compiler string
+ 
+      Amount of storage to allocate to hold compiler invocation string.
+ 
+  o   Max Linker size
+ 
+      Amount of storage to allocate to hold linker options.
+ 
+  o   Max Linker string
+ 
+      Amount of storage to allocate to hold linker invocation string.
+ 
+  o   Debugger Program Type
+ 
+      Select the mode that the Debugger should run in. The WorkFrame starts the
+      debugger via DosStartSession and passes the this option to OS/2.
+ 
+  o   Used Eyecatchers
+ 
+ 
+ 
+                                                           Language Profile  38
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      A list of eyecatchers defined for existing language profiles.
+ 
+  o   Include search Path
+ 
+      This string will be concatenated in front of the existing INCLUDE envi-
+      ronment variable when invoking compile/make etc.
+ 
+  o   Library search Path
+ 
+      This string will be concatenated in front of the existing LIB environment
+      variable when invoking link/make etc.
+ 
+  -----------------------------------------------------------------------------
+ 
+ 
+  -----------------------------------------------------------------------------
+  Figure 6. Language Profile Maintenance Dialog
+ 
+ 
+  -----------------------------------------------------------------------------
+ 
+ 
+  -----------------------------------------------------------------------------
+  Figure 7. Language Profile Environment Variables
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                           Language Profile  39
+

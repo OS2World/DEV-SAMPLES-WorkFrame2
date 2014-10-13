@@ -1,0 +1,601 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                    WORKFRAME/2
+                                                          DRAG/DROP CONVENTIONS
+ 
+                                                                        DRAFT 2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                    May 2, 1992
+ 
+ 
+ 
+ 
+                                                                            LTC
+                                                             Toronto Laboratory
+                                                       VNET  - KEHM at TOROLAB6
+                                                 email - workframe@vnet.ibm.com
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  CONTENTS
+  ________
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   Contents  ii
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  FIGURES
+  _______
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   Figures  iii
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  WORKFRAME/2 EXTERNAL DRAG CONVENTIONS
+  _____________________________________
+ 
+ 
+ 
+ 
+ 
+  WorkFrame/2 will use the OS/2 provided Drag/Drop API's as both a source and a
+  target for Dragging operations.
+ 
+  WorkFrame/2 supports the dragging of files and of compiler error messages.
+  The first chapter of this document discusses the conventions for dragging
+  files to and from Workframe/2 windows. The second chapter discusses the drag-
+  ging of error messages from a monitor window to an external tool.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                       WorkFrame/2 External Drag Conventions  1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  DRAGGING FILES
+  ______________
+ 
+ 
+ 
+ 
+ 
+  TARGET CONVENTIONS
+  __________________
+ 
+ 
+  VALID TARGET WINDOWS:
+ 
+  1.  Project File List
+ 
+      This semantic is to copy the file into the directory associated with the
+      project.
+ 
+  2.  File Control
+ 
+      This semantic is to copy the file or directory into the directory indi-
+      cated as the current directory in that window.
+ 
+  WorkFrame/2 will support operations (as contained in the DRAGINFO structure)
+  of DO_COPY or DO_DEFAULT. Any other operations will be flagged as
+  DOR_NODROPOP in response to DM_DRAGOVER messages.
+ 
+  For each item provided, WorkFrame/2 will only accept a drag if all items are
+  DO_COPYABLE, if not DOR_NODROPOP will be returned.  WorkFrame/2 will only
+  support a rendering mechanism of DRM_OS2FILE with a format of either DRF_TEXT
+  or DRF_UNKNOWN. Any others will return DOR_NEVERDROP to DM_DRAGOVER messages.
+  WorkFrame/2 will examine the control flags and reject the drag if DC_REF or
+  DC_GROUP is on. It will interpret a DC_CONTAINER request as a directory. That
+  is the container name plus the source name will be a directory name.
+  WorkFrame/2 will eventually issue a DosCopy for the source file or directory.
+ 
+  If a drag structure passes the criteria described above, WorkFrame/2 will
+  assume the following conventions with respect to the contents of each
+  DRAGITEM structure.
+ 
+ 
+  TARGET RENDERING
+ 
+  If the source handle is provided, WorkFrame/2 will attempt to build a fully
+  qualified name for the source and target of the file copy operation. If the
+  container handle is not NULL, the source name will be concatenated to the
+  container name to create a fully qualified source name, otherwise the
+  sourcename will be assumed to be fully qualified. If the target name is pro-
+  vided it will be assumed to be unqualified and it will be concatenated to the
+  directory name associated with the target window.  If it is not provided,
+  then the sourcename will be assumed to be unqualified and used as the target
+  name. This string will be concatenated to the project directory name to
+  create a fully qualified name.  A copy operation will take place. After the
+  copy completes, a DM_ENDCONVERSATION message will be sent to the source, MP1
+  containing the item number supplied in the DRAGITEM structure and MP2 will
+  contain DMFL_TARGETSUCCESSFUL or DMFL_TARGETFAIL as appropriate.
+ 
+ 
+                                                              Dragging Files  2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  SOURCE RENDERING
+ 
+  If the source handle is not provided, WorkFrame/2 will attempt to communicate
+  with the source to complete the rendering.  WorkFrame/2 will make this deter-
+  mination by examining the first item in the array of DRAGITEM structures. If
+  the first item requires source rendering then it will be assumed that all
+  items require source rendering. That is, WorkFrame/2 will NOT support a
+  mixture of source and target rendering items in the same DRAGINFO structure.
+ 
+  A transfer structure will be build with a rendering mechanism of
+  DRM_OS2FILE,DRF_UNKNOWN. The rendertoname will be the current project direc-
+  tory name concatenated with the target name, if one is provided.  If one is
+  not provided then the directory name followed by a backslash will be pro-
+  vided.  The operation will be DO_COPY.  If the source requested DC_PREPARE a
+  DM_RENDERPREPARE message will be sent first. If the DM_RENDERPREPARE message
+  returns FALSE then the DM_RENDER message will not be sent (a
+  DM_ENCONVERSATION message will NOT be sent either).  A DM_RENDER message will
+  be sent. If the reply flags are set WorkFrame/2 will not support retry.
+  Therefore in this case if DMFL_RENDERRRETRY is set, a DM_RENDERCOMPLETE fol-
+  lowed by a DM_ENDCONVERSATION message will be sent. If the DMFL_NATIVERENDER
+  bit is set alone, then a WorkFrame/2 will attempt a NATIVERENDER if the
+  source file handle has now been provided. In anycase a DM_ENDCONVERSATION
+  message will be sent to the source with DM_TARGETSUCCESSFUL or DM_TARGETFAIL
+  as appropriate.  If the flags are not set then the WorkFrame/2 will send a
+  DM_ENDCONVERSATION message.
+ 
+  To net it out, if DM_RENDER returns TRUE, the WorkFrame will expect a
+  DM_RENDERCOMPLETE message. If DM_RENDER returns FALSE WorkFrame/2 will take
+  the appropriate action based on the flags BUT will NOT expect a
+  DM_RENDERCOMPLETE message.  In any rendering scenario BOTH sides must free
+  their access to the Drag transfer structure. WorkFrame/2 will do it when
+  receiving a DM_RENDERCOMPLETE message or when FALSE is returned from
+  DM_RENDER.
+ 
+  WorkFrame/2 will keep track of a count of the items being rendered (either
+  natively or with cooperation) and will free the drag structures once all are
+  processed.
+ 
+ 
+  MESSAGES PROCESSED BY SOURCE
+ 
+  1.  DM_DRAGOVER
+ 
+      Workframe/2 will determine if the objects are droppable (as described
+      above). Only if all operations and all rendering mechanisms are supported
+      will DOR_DROP be returned.
+ 
+  2.  DM_DROP
+ 
+      Workframe/2 will support rendering as described above, both Target and
+      Source rendering are supported.
+ 
+  3.  DM_DROPHELP
+ 
+ 
+ 
+                                                              Dragging Files  3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      A message box will be displayed describing what kind of operation is sup-
+      ported.
+ 
+  4.  DM_RENDERCOMPLETE
+ 
+      This will occur only when the source has not provided a source file name.
+      WorkFrame/2 will examine the source handle, if the handle is NULL it will
+      assume that the file has been completely processed by the source and will
+      simply return a DM_ENDCONVERSATION. If it is provided then it is assumed
+      that the source has updated the container and source string fields and
+      WorkFrame/2 will perform the copy operation as described above.
+ 
+ 
+ 
+  SOURCE CONVENTIONS
+  __________________
+ 
+ 
+  VALID SOURCE WINDOWS
+ 
+  1.  Project File List
+ 
+  2.  File Control
+ 
+  WorkFrame/2 will build a Draginfo structure containing one dragitem structure
+  for each file selected on the project file list.  The DRAGINFO structures
+  operation field will be set to DO_COPY.  WorkFrame/2 will not support a move
+  operation, that is it will assume its list of files is still valid after a
+  successful drag operation.
+ 
+  Each Dragitem structure will be set up as follows:
+ 
+  o   item
+ 
+      Handle of the file list window. Parent is the desktop, owner is the
+      WorkFrame primary window.
+ 
+  o   itemid
+ 
+      listbox item being dragged (number in listbox for future deselection).
+ 
+  o   type
+ 
+      Will always be DRT_UNKNOWN
+ 
+  o   rendering mechanism and format
+ 
+      DRM_OS2FILE,DRF_UNKNOWN
+ 
+  o   containername
+ 
+      Workframe/2 will place the handle of the source directory of the file
+      being dragged. The directory name will always contain a trailing back-
+      slash.
+ 
+ 
+ 
+                                                              Dragging Files  4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  o   sourcename
+ 
+      Workframe/2 will place the handle of the UNQUALIFIED source filename.  To
+      fully qualify the filename concatenate sourcename to containername.
+ 
+  o   suggested targetname
+ 
+      Workframe/2 will place the sourcename handle here. As a result the
+      targetname = sourcename = unqualified name.
+ 
+  o   control
+ 
+      Will always be zero.
+ 
+  o   supported operations
+ 
+  o   DO_COPYABLE only.
+ 
+ 
+  MESSAGES PROCESSED BY SOURCE
+ 
+  For each file processed by the Target, WorkFrame/2 will expect a
+  DM_ENDCONVERSATION message. MP1 must contain the item number provided by
+  WorkFrame2 in the DRAGITEM structure.  MP2 will contain DMFL_TARGETSUCCESSFUL
+  if the operation worked or DMFL_TARGETFAIL if the operation failed.
+ 
+ 
+  INTERNAL DRAG/DROP
+  __________________
+ 
+  All other windows that participate in drag/drop will only accept internally
+  defined types and rendering mechanisms.  These will not be documented and
+  will only work intra-application.
+ 
+ 
+  PRINTING
+  ________
+ 
+  WorkFrame/2 will NOT support a DRM_PRINT rendering mechanism and it will not
+  handle a DM_PRINT message. The assumption that if the user drives files
+  (DRM_OS2FILE,DRF_UNKNOWN) to a target that only supports the print operation.
+  That target should perform the print operation without any source inter-
+  action. The rationale for this is the elimination of the requirement for all
+  participating sources to provide code that prints files.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                              Dragging Files  5
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  DRAGGING COMPILER ERROR MESSAGES
+  ________________________________
+ 
+ 
+ 
+ 
+ 
+  When a drag operation is started from a monitor window, WorkFrame/2 will
+  invoke the compiler-provided error parsing interface. If the parsing is suc-
+  cessful, WorkFrame/2 will begin a drag operation setting up the Draginfo
+  structure to specify DO_DEFAULT and to contain exactly one DRAGITEM struc-
+  ture. The DRAGITEM structure will be set up as follows:
+ 
+  ITEM                Monitor window handle
+ 
+  ITEMID              0
+ 
+  TYPE                DRT_TEXT
+ 
+  RMF                 <DRM_DDE,DDE3ERRORS>
+ 
+  CONTROL             0
+ 
+  SUPPORTEDOPS        DO_COPYABLE
+ 
+  CONTAINERNAME       handle of string containing project directory with a
+                      trailing backslash.
+ 
+  SOURCENAME          handle of string containing file in error, this name may
+                      or may not be fully qualified depending on the compiler.
+                      It is the name extracted from the error message and is
+                      the name the receiver of the drag should use as the topic
+                      for the subsequent DDE handshaking.
+ 
+  TARGETNAME          0
+ 
+  XOFFSET             Not set
+ 
+  YOFFSET             Not set
+ 
+  Once the target accepts the drag, it should post itself a message to perform
+  the DDE conversation. That is the DDE conversation should not be started
+  until you return from receiveing the DM_DROP message.  For information on the
+  DDE protocols required please refer to the WorkFrame/2 Programming Interface
+  Document. A sample program using drag and drop of error messages and handling
+  the DDE protocols is available from the author.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                            Dragging Compiler Error Messages  6
+

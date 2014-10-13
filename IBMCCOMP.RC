@@ -1,0 +1,36 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP., 1992                                                */
+/*                                                                          */
+/****************************************************************************/
+#define INCL_NLS
+#include <os2.h>
+#include "IBMCCOMP.H"
+
+HELPTABLE ID_MAIN_HELPTABLE
+BEGIN
+    HELPITEM MAINDLG,   ID_MAIN_HELPSUBTABLE, ID_HELP_APP
+    HELPITEM FILEDLG,   ID_MAIN_HELPSUBTABLE, ID_HELP_DLG
+    HELPITEM LISTDLG,   ID_MAIN_HELPSUBTABLE, ID_HELP_ERROR
+END
+
+HELPSUBTABLE ID_MAIN_HELPSUBTABLE
+BEGIN
+END
+
+STRINGTABLE  LOADONCALL
+BEGIN
+   MSG_CMPOPTSMALL        , "Not enough space to store new compile options."
+   MSG_CMPSTRINGSMALL     , "Not enough space to store the invocation string."
+END
+
+rcinclude  IBMCCOMP.DLG
+rcinclude  IBMCOPT.DLG
+rcinclude  IBMCCGEN.DLG
+rcinclude  IBMCSCUS.DLG
+rcinclude  IBMCCTL.DLG
+rcinclude  PREPOPTS.DLG
+rcinclude  OUTFOPT.DLG
+rcinclude  LISTOPT.DLG
+rcinclude  SCTLOPT.DLG
+

@@ -1,0 +1,8 @@
+# IBM Developer's Workframe/2 Make File Creation run at 14:29:25 on 05/03/92
+
+# Make File Creation run in directory:
+#   A:\DOSRUN;
+
+DOSCL2.OBJ:  DOSCL2.C  \
+   DOSCL2.MAK
+

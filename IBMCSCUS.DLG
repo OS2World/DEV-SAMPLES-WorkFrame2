@@ -1,0 +1,38 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP., 1992                                                */
+/*                                                                          */
+/****************************************************************************/
+DLGTEMPLATE GENCUSTDLG LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG "Custom Storage Model", GENCUSTDLG, 50, -23, 175, 166, FS_NOBYTEALIGN |
+                FS_DLGBORDER |  WS_CLIPSIBLINGS | WS_SAVEBITS,
+                FCF_TITLEBAR | FCF_MOUSEALIGN
+    BEGIN
+        CONTROL "OK", 1, 8, 8, 35, 13, WC_BUTTON, BS_PUSHBUTTON | BS_DEFAULT | WS_TABSTOP |
+                WS_VISIBLE
+        CONTROL "Code Pointers", 501, 4, 130, 167, 32, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "Short", GENCUSTSHRT, 11, 138, 57, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Long", 503, 67, 138, 41, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Data Pointers", 504, 4, 93, 167, 32, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "Near", GENCUSTNEAR, 11, 102, 40, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Far", 506, 67, 102, 32, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Huge", 507, 123, 102, 43, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Segment Setup", 508, 35, 28, 107, 60, WC_STATIC, SS_GROUPBOX |
+                WS_GROUP | WS_VISIBLE
+        CONTROL "SS=DS", GENCUSTSSDS, 41, 62, 74, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "SS!=DS, SAVE DS", 510, 41, 47, 91, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "SS!=DS, !SAVE DS", 511, 41, 32, 93, 10, WC_BUTTON, BS_AUTORADIOBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+    END
+END
+

@@ -1,0 +1,40 @@
+/****************************************************************************/
+/*                                                                          */
+/* COPYRIGHT IBM CORP., 1992                                                */
+/*                                                                          */
+/****************************************************************************/
+DLGTEMPLATE 257 LOADONCALL MOVEABLE DISCARDABLE
+BEGIN
+    DIALOG "IBMC  Compiler Options", 257, -326, -32, 243, 186, FS_NOBYTEALIGN |
+                FS_DLGBORDER | FS_SIZEBORDER |  WS_CLIPSIBLINGS |
+                WS_SAVEBITS, FCF_SYSMENU | FCF_TITLEBAR
+    BEGIN
+        CONTROL "OK", 1, 8, 7, 35, 13, WC_BUTTON, BS_PUSHBUTTON | BS_DEFAULT | WS_TABSTOP |
+                WS_VISIBLE
+        CONTROL "RESET", 281, 52, 7, 37, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "CANCEL", 2, 153, 7, 42, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "HELP", 280, 201, 7, 35, 13, WC_BUTTON, BS_PUSHBUTTON |
+                BS_HELP | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Compile Control Dialog", CTLDLG, 43, 166, 158, 14, WC_BUTTON,
+                BS_PUSHBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Listing Options...", LSTDLG, 43, 147, 158, 14, WC_BUTTON,
+                BS_PUSHBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Preprocessor Options...", PRPRDLG, 43, 127, 158, 14, WC_BUTTON,
+                BS_PUSHBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Code Generation Options...", CGENDLG, 43, 107, 158, 14, WC_BUTTON,
+                BS_PUSHBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Optimization Options...", OPTMDLG, 43, 89, 158, 14, WC_BUTTON,
+                BS_PUSHBUTTON | WS_TABSTOP | WS_VISIBLE
+        CONTROL "Output Files ...", FILEDLG, 43, 69, 158, 14, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Source Code Control..", SORCDLG, 43, 52, 158, 14, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+        CONTROL "Save with Project", 266, 51, 29,100, 10, WC_BUTTON, BS_AUTOCHECKBOX | WS_TABSTOP |
+                WS_VISIBLE
+        CONTROL "DEFAULT", 282, 98, 7, 49, 13, WC_BUTTON, BS_PUSHBUTTON |
+                WS_TABSTOP | WS_VISIBLE
+    END
+END
+

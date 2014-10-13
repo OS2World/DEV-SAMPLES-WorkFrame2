@@ -1,0 +1,470 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                               NDX FILE FORMATS
+ 
+                                                                        DRAFT 1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                    May 2, 1992
+ 
+ 
+ 
+ 
+                                                                            LTC
+                                                             Toronto Laboratory
+                                                       VNET  - KEHM at TOROLAB6
+                                                 email - workframe@vnet.ibm.com
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  CONTENTS
+  ________
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   Contents  ii
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  FIGURES
+  _______
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   Figures  iii
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  NDX FILES
+  _________
+ 
+ 
+ 
+ 
+ 
+  INTRODUCTION
+  ____________
+ 
+  The purpose of the NDX file is to provide a means where one product (such as
+  a compiler) can document its keywords and associate a command to be invoked
+  when a match is found for that keyword.  Another product (such as an editor)
+  can find a match in the keyword list for a given string and perform the asso-
+  ciated command on behalf of the first product. The most obvious use of this
+  format is for the invocation of help text. For example, the OS/2 Toolkit
+  could ship a file containing all the API calls, TOOLKT20.NDX. A particular
+  API, could be documented such that when another product found a match for
+  that API it would know to invoke the VIEW utility for the topic.  If someone
+  requested help for DosOpen, the file would state that the command "VIEW
+  GUIREF20.INF DosOpen" should be issued.
+ 
+ 
+  FORMAT
+  ______
+ 
+  An NDX file is comprised of at least three lines.  Each line must be less
+  than 254 characters long (followed by CRLF).
+ 
+  1.  The FIRST line contains the keyword "EXTENSIONS:" followed by a list of
+      extensions (case insensitive) by which the interpreting product can iden-
+      tify the types of files for which these keywords are applicable.  The
+      extensions are 1 to 3 characters and entries are blank delimited.
+ 
+      The character asterisk (*) is reserved to mean any file type is valid.
+      For example,
+ 
+ 
+        EXTENSIONS: C I SQC H
+ 
+ 
+      This would specifically be used to resolve ambiguities when multiple NDX
+      files are processed. For example the KEYWORD "if" would be valid for
+      REXX, C, or PASCAL. The tool processing the file would know which NDX
+      file to use based on matching the file's extension with the first NDX
+      file that supports that extension.
+ 
+  2.  The second line contains the keyword DESCRIPTION: followed by text that
+      describes the product being supported. For example,
+ 
+ 
+        DESCRIPTION: IBM CSET/2 Language keywords
+ 
+ 
+      This information could be used in may ways. For example, if there were
+      two NDX files in affect for the same file extension, the supporting tool
+ 
+ 
+ 
+                                                                   NDX Files  1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      could display a list of possible NDX files and ask the user to select one
+      (similar to the way ASSOCIATE works).
+ 
+  3.  Lines 3 through N contain
+       one or more entries.  Each entry is of the form:
+ 
+ 
+          (keyword,command)
+ 
+ 
+      Where:
+ 
+      RIGHT PARENTHESIS a delimiter to indicate the beginning of an entry,
+ 
+      LEFT PARENTHESIS a delimiter to indicate the end of an entry,
+ 
+      KEYWORD        a string on which a case sensitive match should be made.
+                     The keyword should NOT contain a left or right parenthesis
+                     and may contain a trailing asterisk.  The asterisk indi-
+                     cates that a match can be made if the string being
+                     searched for matches all the characters prior to the
+                     asterisk (see examples 1 and 7).  If an * is one of the
+                     characters in the keyword use a second asterisk (**) as
+                     the escape character. If two asterisks are required then 4
+                     asterisks must be entered (see examples 4 and 6).
+ 
+                     If more than one instance of the same keyword is found
+                     then it is implementation-defined as to which one is used.
+ 
+      COMMAND        any valid command supported by the Operating System.  The
+                     command may support any number of tildes (&tilde.) to
+                     indicate where in the invocation string the keyword for
+                     which a match is found is to be placed (see example 3).
+ 
+      COMMENTS       Any characters not contained within parenthesis
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   NDX Files  2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  EXAMPLE
+  _______
+ 
+          SAMPLE.NDX
+ 
+ 
+            EXTENSIONS: SCR DOC TXT
+            DESCRIPTION: Product XXX's Keywords
+            (Ralph, VIEW mynames.inf RALPH) (Ral*, VIEW mynames.inf &tilde.)
+            (**, View mycomp.inf multiply)  (****, VIEW mycomp.inf exponentiation)
+            (*, View mynames.inf &tilde.)
+ 
+ 
+  The entries are explained as follows:
+ 
+  1.  The search string must match the keyword "Ralph" exactly and if it does
+      invoke the command interpreter with "view mycomp.inf RALPH)
+ 
+  2.  Any string beginning with "Ral" followed by zero or more characters
+      matches the keyword. Use the command VIEW mynames.inf <string> where is
+      the string for which a match was found.
+ 
+  3.  Since * is the escape character the keyword <string> is really the single
+      character "*". If the string being used is also a single asterisk then
+      issue the command "View mycomp.inf multiply".
+ 
+  4.  Two escape characters are used to indicate the keyword "**". If the
+      string matches the keyword exactly then issue the command "View
+      mycomp.inf exponentiation".
+ 
+  5.  All other strings should cause the command "View mynames.inf <string>" to
+      be issued. <string> is the string for which the match was found.
+ 
+  Examples:
+ 
+  Consider the following text and assume that the user presses a predefined
+  help key for each word from left to right.
+ 
+ 
+        Ralphie = 3 ** 4 *  Ralph
+ 
+ 
+  1.  "Ralphie" will match the second entry since it does not match the first
+      entry exactly. "VIEW mynames.inf Ralphie" will be issued.
+ 
+  2.  "=" will not match any specific entry so the catchall entry 5 will be
+      used and "VIEW mynames.inf =" will be issued.
+ 
+  3.  "3" will not match any specific entry so the catchall entry 5 will be
+      used and "VIEW mynames.inf 3" will be issued.
+ 
+  4.  "**" will match entry 4 and "VIEW mycomp.inf exponentiation" will be
+      issued.
+ 
+ 
+ 
+ 
+                                                                   NDX Files  3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  5.  "4" will not match any specific entry so the catchall entry 5 will be
+      used and "VIEW mynames.inf 4" will be issued.
+ 
+  6.  "*" will match entry 3 and "VIEW mycomp.inf multiply" will be issued.
+ 
+  7.  "Ralph" will match entry 1 exactly and "VIEW mynames.inf RALPH" will be
+      issued.
+ 
+ 
+  RECOMMENDATIONS:
+  ________________
+ 
+  1.  NDX files should be searched for along the DPATH
+ 
+  2.  One or more NDX files can be specified through the use of an environment
+      variable called HELPNDX.
+ 
+      SET HELPNDX=DDE4.NDX+TOOLKT20.NDX
+ 
+  3.  Each product may develop its own scheme for keyword conflict resolution
+      (extended attributes, INI files etc) but the EXTENSIONS and DESCRIPTION
+      lines will be present in each NDX file and should be used wherever pos-
+      sible.
+ 
+  4.  An * entry should be avoided since when NDX files are combined the
+      affects of multiple * entries is unpredictable.
+ 
+ 
+  TOOLKT20 EXAMPLE:
+  _________________
+ 
+  The following would probably be sufficient for the OS/2 2.0 toolkit.
+ 
+    EXTENSIONS: *
+    DESCRIPTION: OS/2 2.0 Programming Interfaces
+    (Win*, VIEW PMWIN.INF &tilde.)                   (MM_*, VIEW PMMSG.INF &tilde.)
+    (Spl*, VIEW PMWIN.INF &tilde.)                   (LM_*, VIEW PMMSG.INF &tilde.)
+    (Prf*, VIEW PMWIN.INF &tilde.)                   (HM_*, VIEW PMMSG.INF &tilde.)
+    (Gpi*, VIEW PMGPI.INF &tilde.)                   (FNTM_*, VIEW PMMSG.INF &tilde.)
+    (WM_*, VIEW PMMSG.INF &tilde.)                   (FDM_*, VIEW PMMSG.INF &tilde.)
+    (PL_*, VIEW PMMSG.INF &tilde.)                   (EM_*, VIEW PMMSG.INF &tilde.)
+    (TBM_*, VIEW PMMSG.INF &tilde.)                  (DM_*, VIEW PMMSG.INF &tilde.)
+    (SM_*, VIEW PMMSG.INF &tilde.)                   (CBM_*, VIEW PMMSG.INF &tilde.)
+    (SPBM_*, VIEW PMMSG.INF &tilde.)                 (BM_*, VIEW PMMSG.INF &tilde.)
+    (SBM_*, VIEW PMMSG.INF &tilde.)                  (Dos*, VIEW GUIREF20.INF &tilde.)
+    (MLM_*, VIEW PMMSG.INF &tilde.)                  (Drg*, VIEW PMFUN.INF &tilde.)
+    (Dev*, VIEW PMFUN.INF &tilde.)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                                   NDX Files  4
+ 
+ 
+
